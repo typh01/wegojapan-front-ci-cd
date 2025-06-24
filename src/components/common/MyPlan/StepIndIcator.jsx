@@ -16,7 +16,6 @@ const StepIndicator = ({
             {" "}
             {/* key를 이용하여 리액트의 Fragment로 그룹핑 */}
             <div
-              onClick={onStepClick ? () => onStepClick(stepNumber) : undefined}
               className={`
                         flex flex-col justify-center items-center 
                         w-8 h-8 
