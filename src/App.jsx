@@ -2,11 +2,11 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
-
 import PrivacyPolicy from "./components/Footer/PrivacyPolicy";
 import EmailCollectionPolicy from "./components/Footer/EmailCollectionPolicy";
 import TermsOfService from "./components/Footer/TermsOfService";
 import CustomerCenter from "./components/Footer/CustomerCenter";
+import StepIndicator from "./components/common/MyPlan/Step";
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
           />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/customer-service" element={<CustomerCenter />} />
+          <Route path="/myplan" element={<StepIndicator />} />
         </Routes>
       </main>
 
