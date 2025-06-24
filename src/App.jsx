@@ -8,6 +8,8 @@ import EmailCollectionPolicy from "./components/Footer/EmailCollectionPolicy";
 import TermsOfService from "./components/Footer/TermsOfService";
 import CustomerCenter from "./components/Footer/CustomerCenter";
 
+import StepButton from "./components/common/StepButton";
+
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
