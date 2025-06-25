@@ -16,6 +16,12 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
     travelers: "",
   });
 
+  const [touched, setTouched] = useState({
+    startDate: false,
+    endDate: false,
+    travelers: false,
+  });
+
   // initialData가 변경될 때 상태 업데이트
   useEffect(() => {
     setStartDate(initialData.startDate || "");
@@ -24,7 +30,12 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
   }, [initialData]);
 
   // 유효성 검사
-  const validateData = (newStartDate, newEndDate, newTravelers) => {
+  const validateData = (
+    newStartDate,
+    newEndDate,
+    newTravelers,
+    showAllErrors = false
+  ) => {
     const newErrors = {
       startDate: "",
       endDate: "",
@@ -33,28 +44,34 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
 
     let isValid = true;
 
-    if (!newStartDate) {
-      newErrors.startDate = "여행 시작일을 선택해주세요.";
-      isValid = false;
+    if (showAllErrors || touched.startDate) {
+      if (!newStartDate) {
+        newErrors.startDate = "여행 시작일을 선택해주세요.";
+        isValid = false;
+      }
     }
 
-    if (!newEndDate) {
-      newErrors.endDate = "여행 종료일을 선택해주세요.";
-      isValid = false;
-    } else if (newStartDate && newEndDate < newStartDate) {
-      newErrors.endDate = "종료일은 시작일보다 늦어야 합니다.";
-      isValid = false;
+    if (showAllErrors || touched.endDate) {
+      if (!newEndDate) {
+        newErrors.endDate = "여행 종료일을 선택해주세요.";
+        isValid = false;
+      } else if (newStartDate && newEndDate < newStartDate) {
+        newErrors.endDate = "종료일은 시작일보다 늦어야 합니다.";
+        isValid = false;
+      }
     }
 
-    if (!newTravelers) {
-      newErrors.travelers = "여행 인원을 입력해주세요.";
-      isValid = false;
-    } else if (parseInt(newTravelers) < 1) {
-      newErrors.travelers = "최소 1명 이상이어야 합니다.";
-      isValid = false;
-    } else if (parseInt(newTravelers) > 20) {
-      newErrors.travelers = "최대 20명까지 가능합니다.";
-      isValid = false;
+    if (showAllErrors || touched.travelers) {
+      if (!newTravelers) {
+        newErrors.travelers = "여행 인원을 입력해주세요.";
+        isValid = false;
+      } else if (parseInt(newTravelers) < 1) {
+        newErrors.travelers = "최소 1명 이상이어야 합니다.";
+        isValid = false;
+      } else if (parseInt(newTravelers) > 20) {
+        newErrors.travelers = "최대 20명까지 가능합니다.";
+        isValid = false;
+      }
     }
 
     setErrors(newErrors);
@@ -64,7 +81,13 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
 
   // 외부에서 호출할 수 있는 유효성 검사 함수 (Step.jsx에서 호출)
   const validateStep = () => {
-    const result = validateData(startDate, endDate, travelers);
+    setTouched({
+      startDate: true,
+      endDate: true,
+      travelers: true,
+    });
+
+    const result = validateData(startDate, endDate, travelers, true);
 
     if (!result.isValid) {
       const firstError = Object.values(result.errors).find(
@@ -97,18 +120,21 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
   const handleStartDateChange = (e) => {
     const newStartDate = e.target.value;
     setStartDate(newStartDate);
+    setTouched((prev) => ({ ...prev, startDate: true }));
     updateData(newStartDate, endDate, travelers);
   };
 
   const handleEndDateChange = (e) => {
     const newEndDate = e.target.value;
     setEndDate(newEndDate);
+    setTouched((prev) => ({ ...prev, endDate: true }));
     updateData(startDate, newEndDate, travelers);
   };
 
   const handleTravelersChange = (e) => {
     const newTravelers = e.target.value;
     setTravelers(newTravelers);
+    setTouched((prev) => ({ ...prev, travelers: true }));
     updateData(startDate, endDate, newTravelers);
   };
 
