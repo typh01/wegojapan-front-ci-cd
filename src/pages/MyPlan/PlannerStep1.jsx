@@ -1,25 +1,20 @@
-import React, {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import React, { useState, useEffect } from "react";
 
-const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
+const PlannerStep1 = ({
+  onDataChange,
+  onValidationChange,
+  initialData = {},
+  showErrors = false,
+}) => {
   const [startDate, setStartDate] = useState(initialData.startDate || "");
   const [endDate, setEndDate] = useState(initialData.endDate || "");
   const [travelers, setTravelers] = useState(initialData.travelers || "");
 
   const [errors, setErrors] = useState({
+    // 필드별 에러 메시지 상태 관리
     startDate: "",
     endDate: "",
     travelers: "",
-  });
-
-  const [touched, setTouched] = useState({
-    startDate: false,
-    endDate: false,
-    travelers: false,
   });
 
   // initialData가 변경될 때 상태 업데이트
@@ -30,12 +25,7 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
   }, [initialData]);
 
   // 유효성 검사
-  const validateData = (
-    newStartDate,
-    newEndDate,
-    newTravelers,
-    showAllErrors = false
-  ) => {
+  const validateData = (newStartDate, newEndDate, newTravelers) => {
     const newErrors = {
       startDate: "",
       endDate: "",
@@ -44,34 +34,28 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
 
     let isValid = true;
 
-    if (showAllErrors || touched.startDate) {
-      if (!newStartDate) {
-        newErrors.startDate = "여행 시작일을 선택해주세요.";
-        isValid = false;
-      }
+    if (!newStartDate) {
+      newErrors.startDate = "여행 시작일을 선택해주세요.";
+      isValid = false;
     }
 
-    if (showAllErrors || touched.endDate) {
-      if (!newEndDate) {
-        newErrors.endDate = "여행 종료일을 선택해주세요.";
-        isValid = false;
-      } else if (newStartDate && newEndDate < newStartDate) {
-        newErrors.endDate = "종료일은 시작일보다 늦어야 합니다.";
-        isValid = false;
-      }
+    if (!newEndDate) {
+      newErrors.endDate = "여행 종료일을 선택헤주세요.";
+      isValid = false;
+    } else if (newStartDate && newEndDate < newStartDate) {
+      newErrors.endDate = "종료일은 시작일보다 늦어야 합니다.";
+      isValid = false;
     }
 
-    if (showAllErrors || touched.travelers) {
-      if (!newTravelers) {
-        newErrors.travelers = "여행 인원을 입력해주세요.";
-        isValid = false;
-      } else if (parseInt(newTravelers) < 1) {
-        newErrors.travelers = "최소 1명 이상이어야 합니다.";
-        isValid = false;
-      } else if (parseInt(newTravelers) > 20) {
-        newErrors.travelers = "최대 20명까지 가능합니다.";
-        isValid = false;
-      }
+    if (!newTravelers) {
+      newErrors.travelers = "여행 인원을 입력해주세요.";
+      isValid = false;
+    } else if (newTravelers < 1 || newTravelers > 20) {
+      newErrors.travelers = "여행 인원은 최소 1명, 최대 20명 입니다.";
+      isValid = false;
+    } else if (!/^\d+$/.test(newTravelers)) {
+      newErrors.travelers = "여행 인원은 숫자만 입력 가능합니다.";
+      isValid = false;
     }
 
     setErrors(newErrors);
@@ -79,62 +63,41 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
     return { isValid, errors: newErrors };
   };
 
-  // 외부에서 호출할 수 있는 유효성 검사 함수 (Step.jsx에서 호출)
-  const validateStep = () => {
-    setTouched({
-      startDate: true,
-      endDate: true,
-      travelers: true,
-    });
-
-    const result = validateData(startDate, endDate, travelers, true);
-
-    if (!result.isValid) {
-      const firstError = Object.values(result.errors).find(
-        (error) => error !== ""
-      );
-      return {
-        isValid: false,
-        errorMessage: firstError || "모든 필드를 올바르게 입력해주세요.",
-      };
-    }
-
-    return { isValid: true, errorMessage: "" };
-  };
-
-  useImperativeHandle(ref, () => ({
-    validateStep,
-    getData: () => ({ startDate, endDate, travelers }),
-  }));
-
+  // 데이터 업데이트
   const updateData = (newStartDate, newEndDate, newTravelers) => {
-    validateData(newStartDate, newEndDate, newTravelers);
+    const validationResult = validateData(
+      newStartDate,
+      newEndDate,
+      newTravelers
+    );
 
     onDataChange({
       startDate: newStartDate,
       endDate: newEndDate,
       travelers: newTravelers,
     });
+
+    onValidationChange(validationResult.isValid);
   };
 
+  // 시작일 변경
   const handleStartDateChange = (e) => {
     const newStartDate = e.target.value;
     setStartDate(newStartDate);
-    setTouched((prev) => ({ ...prev, startDate: true }));
     updateData(newStartDate, endDate, travelers);
   };
 
+  // 종료일 변경
   const handleEndDateChange = (e) => {
     const newEndDate = e.target.value;
     setEndDate(newEndDate);
-    setTouched((prev) => ({ ...prev, endDate: true }));
     updateData(startDate, newEndDate, travelers);
   };
 
+  // 여행자 수 변경
   const handleTravelersChange = (e) => {
     const newTravelers = e.target.value;
     setTravelers(newTravelers);
-    setTouched((prev) => ({ ...prev, travelers: true }));
     updateData(startDate, endDate, newTravelers);
   };
 
@@ -155,7 +118,7 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
           </div>
@@ -170,14 +133,14 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
           value={startDate}
           onChange={handleStartDateChange}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-            errors.startDate
+            showErrors && errors.startDate
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-blue-500"
           }`}
           placeholder="연도 - 월 - 일"
         />
         {/* 시작일 에러 메시지 표시 */}
-        {errors.startDate && (
+        {showErrors && errors.startDate && (
           <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
         )}
       </div>
@@ -211,16 +174,16 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
           type="date"
           value={endDate}
           onChange={handleEndDateChange}
-          min={startDate} // 시작일 이후의 날짜만 선택 가능
+          min={startDate}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-            errors.endDate
+            showErrors && errors.endDate
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-blue-500"
           }`}
           placeholder="연도 - 월 - 일"
         />
         {/* 종료일 에러 메시지 표시 */}
-        {errors.endDate && (
+        {showErrors && errors.endDate && (
           <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
         )}
       </div>
@@ -255,18 +218,19 @@ const PlannerStep1 = forwardRef(({ onDataChange, initialData = {} }, ref) => {
           min="1"
           max="20"
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-            errors.travelers
+            showErrors && errors.travelers
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-blue-500"
           }`}
           placeholder="최소1명, 최대20명 입력해주세요"
         />
-        {/* 인원 에러 메시지 표시 */}
-        {errors.travelers && (
+        {/* 인원 에러 메시지 표시  */}
+        {showErrors && errors.travelers && (
           <p className="text-red-500 text-sm mt-1">{errors.travelers}</p>
         )}
       </div>
     </div>
   );
-});
+};
+
 export default PlannerStep1;
