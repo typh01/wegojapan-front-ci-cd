@@ -7,6 +7,8 @@ import EmailCollectionPolicy from "./components/Footer/EmailCollectionPolicy";
 import TermsOfService from "./components/Footer/TermsOfService";
 import CustomerCenter from "./components/Footer/CustomerCenter";
 import StepIndicator from "./components/common/MyPlan/Step";
+import SignUp from "./components/Auth/SignUp";
+import Login from "./components/Auth/Login";
 
 function App() {
   return (
@@ -23,6 +25,10 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/customer-service" element={<CustomerCenter />} />
           <Route path="/myplan" element={<StepIndicator />} />
+
+          {/* 로그인 유저 */}
+          <Route path="/SignUp" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
 
