@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import StepButton from "./StepButton";
 import StepIndicator from "./StepIndicator";
 import PlannerStep1 from "../../../pages/MyPlan/PlannerStep1";
+import PlannerStep2 from "../../../pages/MyPlan/PlannerStep2";
 
 const Step = () => {
   // "나의 플랜 세우기" 페이지의 고유 식별자
   const PAGE_KEY = "myPlanPage";
-
-  // 각 스텝 컴포넌트에 대한 ref (유효성 검사 함수 호출용)
-  const step1Ref = useRef(null);
-  // ====================step2, step3, step4의 ref 추가 하기 ====================
 
   // 몇번째 스텝인지 sessionStorage에서 불러오기(없으면 기본값 1로~)
   const [currentStep, SetCurrentStep] = useState(() => {
@@ -28,41 +25,76 @@ const Step = () => {
           travelers: "",
         };
   });
-  // ====================step2, step3, step4 데이터 상태 추가====================
+
+  // step2 데이터의 상태 불러오기
+  const [step2Data, setStep2Data] = useState(() => {
+    const savedData = sessionStorage.getItem(`${PAGE_KEY}_step2Data`);
+    return savedData
+      ? JSON.parse(savedData)
+      : {
+          selectedRegion: "",
+        };
+  });
+
+  // step의 유효성 검사 상태 관리
+  const [step1Valid, setStep1Valid] = useState(false);
+  const [step2Valid, setStep2Valid] = useState(false);
+
+  // step의 에러 메시지 표시 상태 관리
+  const [showStep1Errors, setShowStep1Errors] = useState(false);
+  const [showStep2Errors, setShowStep2Errors] = useState(false);
+  // TODO step3, step4 데이터 상태도 넣어야함!!!!!!
 
   // currentStep이 변경 -> 세션스토리지에 저장
   useEffect(() => {
     sessionStorage.setItem(`${PAGE_KEY}_currentStep`, currentStep.toString());
   }, [currentStep]);
 
-  // step1Data가 변경 ->  세션스토리지에 저장
+  // step의 Data가 변경 ->  세션스토리지에 저장
   useEffect(() => {
     sessionStorage.setItem(`${PAGE_KEY}_step1Data`, JSON.stringify(step1Data));
   }, [step1Data]);
-  // ====================step2, step3, step4 저장도 추가하기====================
 
-  // PlannerStep1에서 데이터가 변경될 경우
+  useEffect(() => {
+    sessionStorage.setItem(`${PAGE_KEY}_step2Data`, JSON.stringify(step2Data));
+  }, [step2Data]);
+  // TODO step3, step4의 데이터 변경 시 session에 저장하는 것도 추가하기
+
+  // 각각의 step의 데이터가 변경될 떄 호출
   const handleStep1DataChange = (data) => {
     setStep1Data(data);
+    setShowStep1Errors(false); // 데이터가 변경되면 에러 메시지 숨김
   };
-  // ====================step2, step3, step4 데이터 변경 핸들러 추가 ====================
+
+  const handleStep2DataChange = (data) => {
+    setStep2Data(data);
+  };
+
+  // Step의 유효성 검사 결과 변경되면 호출
+  const handleStep1ValidationChange = (isValid) => {
+    setStep1Valid(isValid); // 유효성 검사 결과 업데이트
+  };
+
+  const handleStep2ValidationChange = (isValid) => {
+    setStep2Valid(isValid);
+  };
+  // TODO step3, step4도 만들면 추가하기
 
   // 다음 단계로 넘어갈때의 유효성 검사
   // 현재 스텝에 따라 해당 스텝의 유효성 검사 함수 호출
   const goToNextStep = () => {
     if (currentStep === 1) {
-      if (step1Ref.current) {
-        const validationResult = step1Ref.current.validateStep();
-        if (!validationResult.isValid) {
-          alert(validationResult.errorMessage);
-          return; // 다음 단계로 이동하지 않음
-        }
-      } else {
-        alert("데이터를 입력해주세요.");
+      if (!step1Valid) {
+        setShowStep1Errors(true);
+        return;
+      }
+    } else if (currentStep === 2) {
+      if (!step2Valid) {
+        setShowStep2Errors(true);
         return;
       }
     }
-    // ====================step2, step3, step4 유효성 검사 추가 예정====================
+    // TODO step3, step4 유효성 검사 추가 예정
 
     if (currentStep < 4) {
       SetCurrentStep(currentStep + 1);
@@ -84,7 +116,8 @@ const Step = () => {
   const clearSessionStorageData = () => {
     sessionStorage.removeItem(`${PAGE_KEY}_currentStep`);
     sessionStorage.removeItem(`${PAGE_KEY}_step1Data`);
-    // ====================step2, step3, step4 초기화 추가====================
+    sessionStorage.removeItem(`${PAGE_KEY}_step2Data`);
+    // TODO step3, step4 초기화 추가
 
     // 모든 상태 초기화
     SetCurrentStep(1);
@@ -93,12 +126,24 @@ const Step = () => {
       endDate: "",
       travelers: "",
     });
-    // ====================step2, step3, step4 상태 초기화 추가하기 ====================
+    setStep2Data({
+      selectedRegion: "",
+    });
+    // TODO step3, step4 상태 초기화 추가하기
+
+    // Step 유효성 검사 상태 초기화
+    setStep1Valid(false);
+    setStep2Valid(false);
+
+    // 에러 메시지 표시 상태 초기화
+    setShowStep1Errors(false);
+    setShowStep2Errors(false);
+    // TODO step3, step4 상태 초기화 추가하기
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-6">
-      <div className="w-full max-w-[1294px] h-[834px] flex-shrink-0 rounded-[20px] bg-white shadow-[0px_0px_15px_0px_rgba(0,0,0,0.10)] p-8 flex flex-col">
+    <div className="flex justify-center items-start min-h-screen p-6">
+      <div className="w-full max-w-[1294px] min-h-[834px] flex-shrink-0 rounded-[20px] bg-white shadow-[0px_0px_15px_0px_rgba(0,0,0,0.10)] p-8 flex flex-col">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             오사카 여행 플래너
@@ -154,29 +199,35 @@ const Step = () => {
 
         {/* 스텝별 컨텐츠 내용 */}
         <div className="mb-8 flex-1">
-          <div className="bg-white p-6 rounded-lg shadow-sm border h-full flex flex-col justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
             {currentStep === 1 && (
               <PlannerStep1
-                ref={step1Ref}
                 onDataChange={handleStep1DataChange}
+                onValidationChange={handleStep1ValidationChange}
                 initialData={step1Data}
+                showErrors={showStep1Errors}
               />
             )}
-
             {currentStep === 2 && (
-              <div className="text-center text-gray-400">지역선택 내용~~~~</div>
+              <PlannerStep2
+                onDataChange={handleStep2DataChange}
+                onValidationChange={handleStep2ValidationChange}
+                initialData={step2Data}
+                showErrors={showStep2Errors}
+              />
             )}
-
+            // TODO step3, step4의 컴포넌트 추가하기
             {currentStep === 3 && (
               <div className="text-center text-gray-400">방문지선택 내용~~</div>
             )}
+            // TODO step4의 컴포넌트 추가하기
             {currentStep === 4 && (
               <div className="text-center text-gray-400">플랜완성 내용~~!</div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center space-x-4 mt-auto">
+        <div className="flex justify-center space-x-4 pt-4 pb-2">
           {currentStep > 1 && <StepButton type="prev" onClick={goToPrevStep} />}
 
           {currentStep < 4 && <StepButton type="next" onClick={goToNextStep} />}
