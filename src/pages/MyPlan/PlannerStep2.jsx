@@ -333,8 +333,6 @@ const PlannerStep2 = ({
       {/* 사용 안내 */}
       <div className="text-xs text-gray-500 text-center pb-2">
         지도의 마커를 클릭하거나 아래 지역 목록에서 선택해주세요.
-        <br />
-        지도 상단의 버튼들로 지도 타입 변경과 거리뷰를 사용할 수 있습니다.
       </div>
     </div>
   );
