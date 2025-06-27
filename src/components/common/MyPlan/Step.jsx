@@ -216,11 +216,11 @@ const Step = () => {
                 showErrors={showStep2Errors}
               />
             )}
-            // TODO step3, step4의 컴포넌트 추가하기
+            {/* TODO step3, step4의 컴포넌트 추가하기 */}
             {currentStep === 3 && (
               <div className="text-center text-gray-400">방문지선택 내용~~</div>
             )}
-            // TODO step4의 컴포넌트 추가하기
+            {/* TODO step4의 컴포넌트 추가하기 */}
             {currentStep === 4 && (
               <div className="text-center text-gray-400">플랜완성 내용~~!</div>
             )}
