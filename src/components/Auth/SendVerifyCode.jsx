@@ -12,7 +12,7 @@ const SendVerifyCode = ({ email, setCodeSent, setMsg }) => {
     }
 
     axios
-      .post(`${apiUrl}/auth/send-code`, { email })
+      .post(`${apiUrl}/api/emails/send-email`, { email })
       .then(() => {
         setCodeSent(true);
         setMsg("인증번호를 발송했습니다.");
@@ -27,7 +27,7 @@ const SendVerifyCode = ({ email, setCodeSent, setMsg }) => {
     <button
       type="button"
       onClick={sendCode}
-      className="px-4 py-2 bg-lime-400 text-white rounded hover:bg-lime-500"
+      className="px-4 py-2 bg-white text-black border border-gray-400 rounded hover:bg-gray-100"
     >
       인증번호 발송
     </button>

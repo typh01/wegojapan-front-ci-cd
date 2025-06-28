@@ -36,10 +36,10 @@ const Login = () => {
     }
 
     axios
-      .post(`${apiUrl}/auth/login`, { memberId, memberPw })
+      .post(`${apiUrl}/api/auth/login`, { memberId, memberPw })
       .then((response) => {
         if (response.status === 200) {
-          const { loginInfo, tokens } = response.data;
+          const { loginInfo, tokens } = response.data.data;
           if (loginInfo.isActive === "S") {
             alert("정지된 계정입니다.");
             return;
@@ -84,13 +84,32 @@ const Login = () => {
           className="border px-3 py-2 w-full rounded mb-4"
         />
 
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={() => navigate("/find-id")}
+            className="text-sm text-gray-700 hover:underline mr-4"
+          >
+            아이디 찾기
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/find-password")}
+            className="text-sm text-gray-700 hover:underline"
+          >
+            비밀번호 찾기
+          </button>
+        </div>
+
         {/* 에러 메시지 */}
         {msg && <p className="text-red-500 text-sm mb-4 text-center">{msg}</p>}
 
         {/* 버튼 영역 */}
-        <div className="flex justify-between gap-4">
-          <StepButton type="prev">취소</StepButton>
-          <StepButton>확인</StepButton>
+        <div className="flex gap-4 justify-center">
+          <StepButton onClick={handleLogin}>확인</StepButton>
+          <StepButton type="prev" onClick={() => navigate(-1)}>
+            취소
+          </StepButton>
         </div>
       </form>
     </div>

@@ -9,6 +9,7 @@ const Header = () => {
   // 로그인 상태 확인 함수
   const handleLogin = () => {
     setIsLoggedIn(true);
+    navi("/login");
   };
 
   // 로그아웃 상태 확인 함수

@@ -5,13 +5,8 @@ const VerifyCode = ({ email, verifyCode, setCodeVerified, setMsg }) => {
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
 
   const handleVerifyCode = () => {
-    if (!email || !verifyCode) {
-      setMsg("이메일과 인증번호를 모두 입력해주세요.");
-      return;
-    }
-
     axios
-      .post(`${apiUrl}/auth/verify-code`, {
+      .post(`${apiUrl}/api/emails/verify-code`, {
         email,
         verifyCode,
       })
@@ -29,7 +24,7 @@ const VerifyCode = ({ email, verifyCode, setCodeVerified, setMsg }) => {
     <button
       type="button"
       onClick={handleVerifyCode}
-      className="px-4 py-2 bg-lime-400 text-white rounded hover:bg-lime-500"
+      className="px-4 py-2 bg-white text-black border border-gray-400 rounded hover:bg-gray-100"
     >
       확인
     </button>
