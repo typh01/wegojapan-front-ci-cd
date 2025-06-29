@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { idRegex, pwRegex } from "./Regex";
+import { AuthContext } from "../Context/AuthContext";
 import StepButton from "../common/MyPlan/StepButton";
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
     memberId: "",
     memberPw: "",
   });
+  const { login } = useContext(AuthContext);
   const [msg, setMsg] = useState("");
 
   const navigate = useNavigate();
@@ -40,13 +42,11 @@ const Login = () => {
       .then((response) => {
         if (response.status === 200) {
           const { loginInfo, tokens } = response.data.data;
-          if (loginInfo.isActive === "S") {
+          if (loginInfo.isActive === "S" || loginInfo.isActive === "N") {
             alert("정지된 계정입니다.");
             return;
           }
-          localStorage.setItem("loginInfo", JSON.stringify(loginInfo));
-          localStorage.setItem("tokens", JSON.stringify(tokens));
-
+          login(loginInfo, tokens);
           navigate("/");
         }
       })
@@ -87,14 +87,14 @@ const Login = () => {
         <div className="flex justify-end mb-4">
           <button
             type="button"
-            onClick={() => navigate("/find-id")}
+            onClick={() => navigate("/FindId")}
             className="text-sm text-gray-700 hover:underline mr-4"
           >
             아이디 찾기
           </button>
           <button
             type="button"
-            onClick={() => navigate("/find-password")}
+            onClick={() => navigate("/findPassword")}
             className="text-sm text-gray-700 hover:underline"
           >
             비밀번호 찾기

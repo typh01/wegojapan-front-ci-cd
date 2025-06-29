@@ -1,20 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import WeGoJapanLogo from "../../assets/icons/WeGoJapan_Logo.png";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../Context/AuthContext";
 
 const Header = () => {
   const navi = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { auth, logout } = useContext(AuthContext);
 
   // 로그인 상태 확인 함수
   const handleLogin = () => {
-    setIsLoggedIn(true);
     navi("/login");
   };
 
   // 로그아웃 상태 확인 함수
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    logout();
   };
 
   // 홈 페이지로 이동하는 함수
@@ -39,7 +39,7 @@ const Header = () => {
 
   // 내정보 페이지로 이동하는 함수
   const goToMyInfo = () => {
-    navi("/myinfo");
+    navi("/myPage");
   };
 
   // 회원가입 페이지로 이동하는 함수
@@ -56,15 +56,26 @@ const Header = () => {
 
         {/* 로그인 상태에 따라 다르게 표시 */}
         <div className="flex items-center space-x-6">
-          {isLoggedIn ? ( // 로그인된 상태라면
+          {auth.isAuthenticated ? ( // 로그인된 상태라면
             <>
-              {/* 나의 정보 */}
-              <button
-                onClick={goToMyInfo}
-                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
-              >
-                나의 정보
-              </button>
+              {/*관리자 여부 판단 */}
+              {auth.loginInfo?.authorities?.some(
+                (auth) => auth.authority === "ROLE_ADMIN"
+              ) ? (
+                <button
+                  onClick={() => navi("/adminPage")}
+                  className="text-blue-600 font-semibold hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                >
+                  관리자 페이지
+                </button>
+              ) : (
+                <button
+                  onClick={goToMyInfo}
+                  className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                >
+                  나의 정보
+                </button>
+              )}
 
               {/* 로그아웃 */}
               <button

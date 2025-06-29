@@ -156,6 +156,7 @@ const SignUp = () => {
               email={formData.email}
               setMsg={setMsg}
               setCodeSent={() => {}}
+              endpoint="/api/emails/send-email"
             />
           </div>
         </div>
@@ -176,6 +177,7 @@ const SignUp = () => {
                 verifyCode={formData.verifyCodeInput}
                 setCodeVerified={setCodeVerified}
                 setMsg={setMsg}
+                endpoint="/api/emails/verify-code"
               />
             </div>
           </div>

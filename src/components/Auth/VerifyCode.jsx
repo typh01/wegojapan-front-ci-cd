@@ -1,12 +1,18 @@
 // src/components/Member/SignUp/VerifyCode.jsx
 import axios from "axios";
 
-const VerifyCode = ({ email, verifyCode, setCodeVerified, setMsg }) => {
+const VerifyCode = ({
+  email,
+  verifyCode,
+  setCodeVerified,
+  setMsg,
+  endpoint,
+}) => {
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
 
   const handleVerifyCode = () => {
     axios
-      .post(`${apiUrl}/api/emails/verify-code`, {
+      .post(`${apiUrl}${endpoint}`, {
         email,
         verifyCode,
       })

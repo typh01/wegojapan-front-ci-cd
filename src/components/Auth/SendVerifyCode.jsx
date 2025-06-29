@@ -2,9 +2,15 @@
 import axios from "axios";
 import { emailRegex } from "./Regex";
 
-const SendVerifyCode = ({ email, setCodeSent, setMsg }) => {
+const SendVerifyCode = ({
+  memberId,
+  memberName,
+  email,
+  setCodeSent,
+  setMsg,
+  endpoint,
+}) => {
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
-
   const sendCode = () => {
     if (!emailRegex.test(email)) {
       setMsg("유효한 이메일을 입력해주세요.");
@@ -12,7 +18,14 @@ const SendVerifyCode = ({ email, setCodeSent, setMsg }) => {
     }
 
     axios
-      .post(`${apiUrl}/api/emails/send-email`, { email })
+      .post(
+        `${apiUrl}${endpoint}`,
+        memberName
+          ? { email, memberName } // 아이디 찾기 사용
+          : memberId
+          ? { email, memberId }
+          : { email } // 회원가입 사용
+      )
       .then(() => {
         setCodeSent(true);
         setMsg("인증번호를 발송했습니다.");
