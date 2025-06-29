@@ -15,6 +15,7 @@ import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import FestivalPage from "./pages/Travel/FestivalPage";
 import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelAdminManagement from "./pages/Travel/TravelAdminManagement";
+import MyTravelPlanDetail from "./pages/MyPlan/MyTravelPlanDetail";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/customer-service" element={<CustomerCenter />} />
           <Route path="/myplan" element={<StepIndicator />} />
+          <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
 
           {/* 사용자 여행지 */}
           <Route path="/travels" element={<TravelPage />} />
