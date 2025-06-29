@@ -284,6 +284,8 @@ const PlannerStep4 = ({
         url
       );
     }
+
+    window.open(url, "blank", "noopener, noreferrer");
   };
 
   // 여행 기간 계산
