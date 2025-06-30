@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StepButton from "./StepButton";
 import StepIndicator from "./StepIndicator";
 import PlannerStep1 from "../../../pages/MyPlan/PlannerStep1";
 import PlannerStep2 from "../../../pages/MyPlan/PlannerStep2";
 import PlannerStep3 from "../../../pages/MyPlan/PlannerStep3";
+import PlannerStep4 from "../../../pages/MyPlan/PlannerStep4";
 
 const Step = () => {
+  const navigate = useNavigate();
+
   // "나의 플랜 세우기" 페이지의 고유 식별자
   const PAGE_KEY = "myPlanPage";
 
@@ -46,19 +50,33 @@ const Step = () => {
           selectedPlaces: [],
         };
   });
-  // TODO step4의 데이터 상태도 넣어야함!!!!!!
+
+  // step4 데이터의 상태 불러오기
+  const [step4Data, setStep4Data] = useState(() => {
+    const savedData = sessionStorage.getItem(`${PAGE_KEY}_step4Data`);
+    return savedData
+      ? JSON.parse(savedData)
+      : {
+          planTitle: "",
+          planDescription: "",
+          minBudget: "",
+          maxBudget: "",
+          flightLink: "",
+          hotelLink: "",
+        };
+  });
 
   // step의 유효성 검사 상태 관리
   const [step1Valid, setStep1Valid] = useState(false);
   const [step2Valid, setStep2Valid] = useState(false);
   const [step3Valid, setStep3Valid] = useState(false);
-  // TODO step4의 유효성 검사 상태도 넣어야함
+  const [step4Valid, setStep4Valid] = useState(false);
 
   // step의 에러 메시지 표시 상태 관리
   const [showStep1Errors, setShowStep1Errors] = useState(false);
   const [showStep2Errors, setShowStep2Errors] = useState(false);
   const [showStep3Errors, setShowStep3Errors] = useState(false);
-  // TODO  step4 데이터 상태도 넣어야함!!!!!!
+  const [showStep4Errors, setShowStep4Errors] = useState(false);
 
   // currentStep이 변경 -> 세션스토리지에 저장
   useEffect(() => {
@@ -77,7 +95,10 @@ const Step = () => {
   useEffect(() => {
     sessionStorage.setItem(`${PAGE_KEY}_step3Data`, JSON.stringify(step3Data));
   }, [step3Data]);
-  // TODO step4의 데이터 변경 시 session에 저장하는 것도 추가하기
+
+  useEffect(() => {
+    sessionStorage.setItem(`${PAGE_KEY}_step4Data`, JSON.stringify(step4Data));
+  }, [step4Data]);
 
   // 각각의 step의 데이터가 변경될 떄 호출
   const handleStep1DataChange = (data) => {
@@ -93,6 +114,11 @@ const Step = () => {
     setStep3Data(data);
   };
 
+  const handleStep4DataChange = (data) => {
+    setStep4Data(data);
+    setShowStep4Errors(false);
+  };
+
   // Step의 유효성 검사 결과 변경되면 호출
   const handleStep1ValidationChange = (isValid) => {
     setStep1Valid(isValid); // 유효성 검사 결과 업데이트
@@ -105,7 +131,10 @@ const Step = () => {
   const handleStep3ValidationChange = (isValid) => {
     setStep3Valid(isValid);
   };
-  // TODO step3, step4도 만들면 추가하기
+
+  const handleStep4ValidationChange = (isValid) => {
+    setStep4Valid(isValid);
+  };
 
   // 다음 단계로 넘어갈때의 유효성 검사
   // 현재 스텝에 따라 해당 스텝의 유효성 검사 함수 호출
@@ -125,8 +154,12 @@ const Step = () => {
         setShowStep3Errors(true);
         return;
       }
+    } else if (currentStep === 4) {
+      if (!step4Valid) {
+        setShowStep4Errors(true);
+        return;
+      }
     }
-    // TODO step4 유효성 검사 추가 예정
 
     if (currentStep < 4) {
       SetCurrentStep(currentStep + 1);
@@ -142,6 +175,7 @@ const Step = () => {
   const handleComplete = () => {
     alert("모든 단계가 완료되었습니다!!");
     clearSessionStorageData();
+    navigate("/");
   };
 
   // 세션스토리지 데이터 초기화
@@ -150,7 +184,7 @@ const Step = () => {
     sessionStorage.removeItem(`${PAGE_KEY}_step1Data`);
     sessionStorage.removeItem(`${PAGE_KEY}_step2Data`);
     sessionStorage.removeItem(`${PAGE_KEY}_step3Data`);
-    // TODO step4 초기화 추가
+    sessionStorage.removeItem(`${PAGE_KEY}_step4Data`);
 
     // 모든 상태 초기화
     SetCurrentStep(1);
@@ -165,18 +199,26 @@ const Step = () => {
     setStep3Data({
       selectedPlaces: [],
     });
-    // TODO step4 상태 초기화 추가하기
+    setStep4Data({
+      planTitle: "",
+      planDescription: "",
+      minBudget: "",
+      maxBudget: "",
+      flightLink: "",
+      hotelLink: "",
+    });
 
     // Step 유효성 검사 상태 초기화
     setStep1Valid(false);
     setStep2Valid(false);
     setStep3Valid(false);
+    setStep4Valid(false);
 
     // 에러 메시지 표시 상태 초기화
     setShowStep1Errors(false);
     setShowStep2Errors(false);
     setShowStep3Errors(false);
-    // TODO step4 상태 초기화 추가하기
+    setShowStep4Errors(false);
   };
 
   return (
@@ -259,13 +301,20 @@ const Step = () => {
                 onDataChange={handleStep3DataChange}
                 onValidationChange={handleStep3ValidationChange}
                 initialData={step3Data}
-                selectedRegion={step2Data.selectedRegion} // 2단계에서 선택한 지역 정보 전달
+                selectedRegion={step2Data.selectedRegion}
                 showErrors={showStep3Errors}
               />
             )}
-            {/* TODO step4의 컴포넌트 추가하기 */}
             {currentStep === 4 && (
-              <div className="text-center text-gray-400">플랜완성 내용~~!</div>
+              <PlannerStep4
+                onDataChange={handleStep4DataChange}
+                onValidationChange={handleStep4ValidationChange}
+                initialData={step4Data}
+                step1Data={step1Data}
+                step2Data={step2Data}
+                step3Data={step3Data}
+                showErrors={showStep4Errors}
+              />
             )}
           </div>
         </div>
