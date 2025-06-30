@@ -17,6 +17,7 @@ import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import FestivalPage from "./pages/Travel/FestivalPage";
 import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelAdminManagement from "./pages/Travel/TravelAdminManagement";
+import MyTravelPlanDetail from "./pages/MyPlan/MyTravelPlanDetail";
 import FindId from "./components/Auth/FindId";
 import { AuthProvider } from "./components/Context/AuthContext";
 import FindIdResult from "./components/Auth/FindIdResult";
@@ -34,6 +35,17 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <Header />
 
+      <main className="max-w-[1440px] mx-auto px-6 py-8">
+        <Routes>
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="/email-collection-policy"
+            element={<EmailCollectionPolicy />}
+          />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/customer-service" element={<CustomerCenter />} />
+          <Route path="/myplan" element={<StepIndicator />} />
+          
         <main className="max-w-[1440px] mx-auto px-6 py-8">
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -79,11 +91,11 @@ function App() {
               path="/admin/travels/options/management"
               element={<TravelOptionsManagement />}
             />
-                
-                
+                               
           {/* 나의 여행 플랜 */}
-          <Route path="/myplan" element={<StepIndicator />} />
-          <Route path="/myplan/list" element={<MyTravelPlanList />} />
+            <Route path="/myplan" element={<StepIndicator />} />
+            <Route path="/myplan/list" element={<MyTravelPlanList />} />
+            <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
           </Routes>
         </main>
 
