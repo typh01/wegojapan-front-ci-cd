@@ -24,6 +24,15 @@ const PlannerStep1 = ({
     setTravelers(initialData.travelers || "");
   }, [initialData]);
 
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 가져옴
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // 유효성 검사
   const validateData = (newStartDate, newEndDate, newTravelers) => {
     const newErrors = {
@@ -33,17 +42,24 @@ const PlannerStep1 = ({
     };
 
     let isValid = true;
+    const todayDate = getTodayDate();
 
     if (!newStartDate) {
       newErrors.startDate = "여행 시작일을 선택해주세요.";
       isValid = false;
+    } else if (newStartDate < todayDate) {
+      newErrors.startDate = "여행 시작일은 오늘 이후로 선택해주세요.";
+      isValid = false;
     }
 
     if (!newEndDate) {
-      newErrors.endDate = "여행 종료일을 선택헤주세요.";
+      newErrors.endDate = "여행 종료일을 선택해주세요.";
       isValid = false;
     } else if (newStartDate && newEndDate < newStartDate) {
       newErrors.endDate = "종료일은 시작일보다 늦어야 합니다.";
+      isValid = false;
+    } else if (newEndDate < todayDate) {
+      newErrors.endDate = "여행 종료일은 오늘 이후로 선택해주세요.";
       isValid = false;
     }
 
@@ -101,6 +117,8 @@ const PlannerStep1 = ({
     updateData(startDate, endDate, newTravelers);
   };
 
+  const todayDate = getTodayDate();
+
   return (
     <div className="space-y-8">
       {/* 여행 시작일 입력 섹션 */}
@@ -132,6 +150,7 @@ const PlannerStep1 = ({
           type="date"
           value={startDate}
           onChange={handleStartDateChange}
+          min={todayDate} // 오늘 날짜 이후로만 선택 가능
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
             showErrors && errors.startDate
               ? "border-red-500 focus:ring-red-500"
@@ -174,7 +193,7 @@ const PlannerStep1 = ({
           type="date"
           value={endDate}
           onChange={handleEndDateChange}
-          min={startDate}
+          min={startDate || todayDate} // 시작일이 선택되어 있으면 시작일 이후 || 없으면 현재날짜
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
             showErrors && errors.endDate
               ? "border-red-500 focus:ring-red-500"
