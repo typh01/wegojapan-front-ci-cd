@@ -18,7 +18,6 @@ import FestivalPage from "./pages/Travel/FestivalPage";
 import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelAdminManagement from "./pages/Travel/TravelAdminManagement";
 import FindId from "./components/Auth/FindId";
-
 import { AuthProvider } from "./components/Context/AuthContext";
 import FindIdResult from "./components/Auth/FindIdResult";
 import FindPassword from "./components/Auth/FindPassword";
@@ -80,6 +79,11 @@ function App() {
               path="/admin/travels/options/management"
               element={<TravelOptionsManagement />}
             />
+                
+                
+          {/* 나의 여행 플랜 */}
+          <Route path="/myplan" element={<StepIndicator />} />
+          <Route path="/myplan/list" element={<MyTravelPlanList />} />
           </Routes>
         </main>
 
