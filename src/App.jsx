@@ -7,14 +7,14 @@ import EmailCollectionPolicy from "./components/Footer/EmailCollectionPolicy";
 import TermsOfService from "./components/Footer/TermsOfService";
 import CustomerCenter from "./components/Footer/CustomerCenter";
 import StepIndicator from "./components/common/MyPlan/Step";
-import TravelRegister from "./pages/Travel/TravelRegister";
-import FestivalRegister from "./pages/Travel/FestivalRegister";
-import TravelOptionsManagement from "./pages/Travel/TravelOptionManagement";
+import TravelRegister from "./pages/Travel/admin/TravelRegister";
+import FestivalRegister from "./pages/Travel/admin/FestivalRegister";
+import TravelOptionsManagement from "./pages/Travel/admin/TravelOptionManagement";
 import TravelPage from "./pages/Travel/TravelPage";
 import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import FestivalPage from "./pages/Travel/FestivalPage";
 import TravelDetailPage from "./pages/Travel/TravelDetail";
-import TravelAdminManagement from "./pages/Travel/TravelAdminManagement";
+import TravelAdminManagement from "./pages/Travel/admin/TravelAdminManagement";
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
           {/* 사용자 여행지 */}
           <Route path="/travels" element={<TravelPage />} />
           <Route path="/travels/search" element={<TravelDetailSearchPage />} />
-          <Route path="/travels/detail" element={<TravelDetailPage />} />
+          <Route path="/travels/detail/:id" element={<TravelDetailPage />} />
           <Route path="/festivals" element={<FestivalPage />} />
 
           {/* 여행지 관련 관리자 기능 */}
