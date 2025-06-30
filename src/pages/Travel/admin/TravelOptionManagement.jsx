@@ -20,7 +20,7 @@ import { useEffect } from "react";
 
 export default function TravelOptionsManagement() {
   const API_URL = window.ENV.API_URL;
-  const token = localStorage.getItem("accessToken");
+  const token = JSON.parse(localStorage.getItem("tokens"))?.accessToken;
 
   const headers = {
     Authorization: `Bearer ${token}`,
