@@ -1,9 +1,12 @@
 import React from "react";
 import StepButton from "../components/common/MyPlan/StepButton";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const MemberList = () => {
+  const memberList = useState();
   const navigate = useNavigate();
+
   const handleSave = (e) => {
     e.preventDefault();
     alert("저장되었습니다.");
@@ -13,37 +16,6 @@ const MemberList = () => {
   const handleCancel = () => {
     navigate("/adminPage");
   };
-
-  // 더미 데이터
-  const dummyMembers = [
-    {
-      no: 12,
-      id: "abcd1234",
-      name: "김한슬",
-      joinedAt: "2025.04.10",
-      role: "관리자",
-      isActive: true,
-      isBanned: false,
-    },
-    {
-      no: 11,
-      id: "asasas111",
-      name: "이성민",
-      joinedAt: "2025.04.10",
-      role: "관리자",
-      isActive: false,
-      isBanned: false,
-    },
-    {
-      no: 10,
-      id: "asasas111",
-      name: "이성민",
-      joinedAt: "2025.04.10",
-      role: "사용자",
-      isActive: true,
-      isBanned: true,
-    },
-  ];
 
   return (
     <div className="p-6">
@@ -61,7 +33,7 @@ const MemberList = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyMembers.map((member) => (
+          {memberList.map((member) => (
             <tr key={member.no} className="border-b">
               <td className="py-2">{member.no}</td>
               <td>{member.id}</td>
@@ -79,11 +51,7 @@ const MemberList = () => {
               </td>
               <td>
                 {member.isActive ? (
-                  member.isBanned ? (
-                    <span className="text-yellow-500 font-semibold">정지</span>
-                  ) : (
-                    <span className="text-green-500 font-semibold">정상</span>
-                  )
+                  <span className="text-green-500 font-semibold">정상</span>
                 ) : (
                   <span className="text-red-500 font-semibold">탈퇴</span>
                 )}

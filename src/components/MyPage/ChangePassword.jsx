@@ -1,20 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { pwRegex } from "../Auth/Regex";
+import { AuthContext } from "../Context/AuthContext";
 import StepButton from "../common/MyPlan/StepButton";
+import axios from "axios";
 
 const ChangePassword = () => {
+  const { auth } = useContext(AuthContext);
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [error, setError] = useState("");
-
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
+  const username = auth?.loginInfo?.username;
   const navigate = useNavigate();
 
   const handleConfirm = () => {
-    console.log("newPw:", newPw);
-    console.log("confirmPw:", confirmPw);
-
     if (newPw !== confirmPw) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
@@ -26,8 +27,31 @@ const ChangePassword = () => {
     }
 
     setError("");
-    alert("비밀번호가 성공적으로 변경되었습니다.");
-    navigate("/login");
+
+    axios
+      .patch(
+        `${apiUrl}/api/members/changePassword`,
+        {
+          memberId: username,
+          currentPassword: currentPw,
+          newPassword: newPw,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.tokens.accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          setNewPw(newPw);
+          alert("비밀번호가 성공적으로 변경되었습니다.");
+          navigate("/login");
+        }
+      })
+      .catch((err) => {
+        console.error("요청 실패:", err);
+      });
   };
 
   const handleCancel = () => {

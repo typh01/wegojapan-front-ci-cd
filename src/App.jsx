@@ -28,24 +28,15 @@ import ChangePassword from "./components/MyPage/ChangePassword";
 import DeleteMember from "./components/MyPage/DeleteMember";
 import AdminPage from "./admin/AdminPage";
 import MemberList from "./admin/MemberList";
+import MyTravelPlanList from "./pages/MyPlan/MyTravelPlanList";
+import ReviewReportList from "./admin/ReviewReportList";
+import TravelReportList from "./admin/TravelReportList";
 
 function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
-
-      <main className="max-w-[1440px] mx-auto px-6 py-8">
-        <Routes>
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route
-            path="/email-collection-policy"
-            element={<EmailCollectionPolicy />}
-          />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/customer-service" element={<CustomerCenter />} />
-          <Route path="/myplan" element={<StepIndicator />} />
-          
         <main className="max-w-[1440px] mx-auto px-6 py-8">
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -71,6 +62,14 @@ function App() {
             {/* 관리자 전용 */}
             <Route path="/adminPage" element={<AdminPage />} />
             <Route path="/adminPage/memberList" element={<MemberList />} />
+            <Route
+              path="/adminPage/reviewReportList"
+              element={<ReviewReportList />}
+            />
+            <Route
+              path="/adminPage/travelReportList"
+              element={<TravelReportList />}
+            />
 
             {/* 사용자 여행지 */}
             <Route path="/travels" element={<TravelPage />} />
@@ -91,14 +90,13 @@ function App() {
               path="/admin/travels/options/management"
               element={<TravelOptionsManagement />}
             />
-                               
-          {/* 나의 여행 플랜 */}
+
+            {/* 나의 여행 플랜 */}
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
             <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </AuthProvider>

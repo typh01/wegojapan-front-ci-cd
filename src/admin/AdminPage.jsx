@@ -14,12 +14,10 @@ const AdminPage = () => {
     }
   }, [isLoading, isAuthenticated, navigate]);
 
-  // 관리자 권한 확인
-  //const isAdmin = loginInfo?.authorities?.some(
-  // (auth) => auth.authority === "ROLE_ADMIN"
-  // );
-
-  const isAdmin = true; // 실제 사용 시 권한 체크 필요
+  //관리자 권한 확인
+  const isAdmin = loginInfo?.authorities?.some(
+    (auth) => auth.authority === "ROLE_ADMIN"
+  );
 
   if (!isAdmin) {
     return (
@@ -39,7 +37,6 @@ const AdminPage = () => {
           text: "회원 전체 조회",
           path: "/adminPage/memberList",
         },
-        { src: "/회원정지.png", text: "회원 정지", path: "/admin/ban" },
       ],
     },
     {
@@ -48,12 +45,12 @@ const AdminPage = () => {
         {
           src: "/여행지등록.png",
           text: "여행지 등록",
-          path: "/admin/trip/register",
+          path: "/adminPage/trip/register",
         },
         {
           src: "/여행지관리.png",
           text: "여행지 관리",
-          path: "/admin/trip/manage",
+          path: "/adminPage/trip/manage",
         },
       ],
     },
@@ -63,19 +60,28 @@ const AdminPage = () => {
         {
           src: "/축제등록.png",
           text: "축제 등록",
-          path: "/admin/festival/register",
+          path: "/adminPage/festival/register",
         },
         {
           src: "/축제관리.png",
           text: "축제 관리",
-          path: "/admin/festival/manage",
+          path: "/adminPage/festival/manage",
         },
       ],
     },
     {
       title: "신고",
       buttons: [
-        { src: "/신고조회.png", text: "신고 조회", path: "/admin/reports" },
+        {
+          src: "/리뷰신고조회.png",
+          text: "리뷰 신고 조회",
+          path: "/adminPage/reviewReportList",
+        },
+        {
+          src: "/여행지정보신고조회.png",
+          text: "여행지 정보 신고 조회",
+          path: "/adminPage/travelReportList",
+        },
       ],
     },
   ];

@@ -41,9 +41,10 @@ const Login = () => {
       .post(`${apiUrl}/api/auth/login`, { memberId, memberPw })
       .then((response) => {
         if (response.status === 200) {
+          console.log();
           const { loginInfo, tokens } = response.data.data;
-          if (loginInfo.isActive === "S" || loginInfo.isActive === "N") {
-            alert("정지된 계정입니다.");
+          if (loginInfo.isActive === "N") {
+            alert("탈퇴한 계정입니다.");
             return;
           }
           login(loginInfo, tokens);
