@@ -48,7 +48,7 @@ const AdminPage = () => {
         {
           src: "/여행지등록.png",
           text: "여행지 등록",
-          path: "/admin/trip/register",
+          path: "/admin/travels",
         },
         {
           src: "/여행지관리.png",
