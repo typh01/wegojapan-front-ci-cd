@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   MapPin,
   Clock,
@@ -10,8 +10,52 @@ import {
   Plus,
 } from "lucide-react";
 import StepButton from "../../../components/common/MyPlan/StepButton";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
 
 function TravelRegister() {
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+  const API_URL = window.ENV.API_URL;
+  const token = JSON.parse(localStorage.getItem("tokens"))?.accessToken;
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  useEffect(() => {
+    fetchDistricts();
+    fetchCategories();
+    fetchOptions();
+    if (isEdit) fetchExisting();
+  }, [id]);
+
+  // 카테고리 데이터 (TB_TRAVEL_CATEGORY)
+  const [categories, setCategories] = useState([]);
+  // 구 데이터 (TB_GU)
+  const [districts, setDistricts] = useState([]);
+  // 여행지 옵션 데이터 (TB_TRAVEL_OPTION)
+  const [travelOptions, setTravelOptions] = useState([]);
+
+  const [facilities, setFacilities] = useState({});
+
+  const formRef = useRef(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    categoryNo: "",
+    districtNo: "",
+    address: "",
+    latitude: "",
+    longitude: "",
+    phone: "",
+    email: "",
+    website: "",
+    explain: "",
+    description: "",
+  });
+
   const [operatingHours, setOperatingHours] = useState({
     월: { isOpen: false, startTime: "09:00", endTime: "18:00" },
     화: { isOpen: false, startTime: "09:00", endTime: "18:00" },
@@ -22,25 +66,10 @@ function TravelRegister() {
     일: { isOpen: false, startTime: "09:00", endTime: "18:00" },
   });
 
-  const facilityItems = [
-    { key: "limitedPeriod", label: "기간 한정 여부" },
-    { key: "parkingAvailable", label: "주차 가능 여부" },
-    { key: "reservationRequired", label: "예약 필요 여부" },
-    { key: "disabledFriendly", label: "장애인 편의 여부" },
-    { key: "restroomAvailable", label: "화장실 유무" },
-  ];
-
   const [uploadedImages, setUploadedImages] = useState([]);
   const [userTags, setUserTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const fileInputRef = useRef(null);
-  const [facilities, setFacilities] = useState({
-    limitedPeriod: false,
-    parkingAvailable: false,
-    reservationRequired: false,
-    disabledFriendly: false,
-    restroomAvailable: false,
-  });
 
   const days = ["월", "화", "수", "목", "금", "토", "일"];
   const dayNames = {
@@ -61,6 +90,108 @@ function TravelRegister() {
     금: "#FFEAA7", // Yellow
     토: "#DDA0DD", // Plum
     일: "#FFB347", // Orange
+  };
+
+  const fetchCategories = () => {
+    axios
+      .get(`${API_URL}/api/admin/travels/category`, { headers })
+      .then((res) => {
+        const categoryList = res.data.data.map((cat) => ({
+          id: cat.categoryNo,
+          name: cat.categoryName,
+          status: cat.categoryStatus === "Y" ? "ACTIVE" : "INACTIVE",
+          createdDate: cat.categoryCreatedDate,
+          modifiedDate: cat.categoryModifiedDate,
+        }));
+        console.log("카테고리 목록 조회 성공:", res.data);
+        setCategories(categoryList);
+      })
+      .catch((err) => {
+        console.error("카테고리 목록 조회 실패:", err);
+      });
+  };
+
+  const fetchDistricts = () => {
+    axios
+      .get(`${API_URL}/api/admin/travels/gu`, { headers })
+      .then((res) => {
+        const guList = res.data.data.map((gu) => ({
+          id: gu.guNo,
+          name: gu.guName,
+          cityNo: gu.cityNo,
+          status: gu.guStatus === "Y" ? "ACTIVE" : "INACTIVE",
+          mapX: gu.guMapX || "",
+          mapY: gu.guMapY || "",
+          createdDate: gu.guCreatedDate,
+          modifiedDate: gu.guModifiedDate,
+        }));
+        console.log("구/군 목록 조회 성공:", res.data);
+        setDistricts(guList);
+      })
+      .catch((err) => {
+        console.error("구/군 목록 조회 실패:", err);
+      });
+  };
+
+  const fetchOptions = () => {
+    axios
+      .get(`${API_URL}/api/admin/travels/option`, { headers })
+      .then((res) => {
+        const optionList = res.data.data.map((opt) => ({
+          id: opt.optionNo,
+          name: opt.optionName,
+          status: opt.optionStatus === "Y" ? "ACTIVE" : "INACTIVE",
+          createdDate: opt.optionCreatedDate,
+          modifiedDate: opt.optionModifiedDate,
+        }));
+        console.log("옵션 목록 조회 성공:", res.data);
+        setTravelOptions(optionList);
+      })
+      .catch((err) => {
+        console.error("옵션 목록 조회 실패:", err);
+      });
+  };
+
+  const fetchExisting = () => {
+    axios
+      .get(`${API_URL}/api/admin/travels/${id}`, { headers })
+      .then((res) => {
+        const d = res.data.data;
+        setFormData({
+          name: d.title,
+          categoryNo: d.categoryNo,
+          districtNo: d.guNo,
+          address: d.address,
+          latitude: d.mapY,
+          longitude: d.mapX,
+          phone: d.tel,
+          email: d.email,
+          website: d.website,
+          explain: d.explain,
+          description: d.description,
+        });
+        // 편의시설, 시간, 태그, 이미지 초기화
+        const opts = {};
+        d.optionList.forEach((o) => {
+          opts[o.travelOptionNo] = true;
+        });
+        setFacilities(opts);
+        const hours = {};
+        days.forEach((day) => {
+          hours[day] = { isOpen: false, startTime: "09:00", endTime: "18:00" };
+        });
+        d.timeList.forEach((t) => {
+          hours[t.dayOfWeek] = {
+            isOpen: true,
+            startTime: t.startTime,
+            endTime: t.endTime,
+          };
+        });
+        setOperatingHours(hours);
+        setUserTags(d.tagList.map((t) => t.tagName));
+        setUploadedImages(d.imageList.map((img) => ({ url: img.imageUrl })));
+      })
+      .catch(() => alert("데이터 로드 실패"));
   };
 
   const toggleDay = (day) => {
@@ -97,26 +228,62 @@ function TravelRegister() {
   };
 
   const handleImageUpload = (e) => {
+    const MAX_IMAGES = 5;
     const files = Array.from(e.target.files || []);
-    setUploadedImages((prev) => [...prev, ...files]);
+    setUploadedImages((prev) => {
+      const total = prev.length + files.length;
+      if (total > MAX_IMAGES) {
+        alert(`이미지는 최대 ${MAX_IMAGES}장까지만 업로드할 수 있습니다.`);
+        return [...prev, ...files.slice(0, MAX_IMAGES - prev.length)];
+      }
+      return [...prev, ...files];
+    });
   };
 
   const removeImage = (index) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const toggleFacility = (facility) => {
+  const uploadImagesToS3 = () => {
+    const formData = new FormData();
+    uploadedImages.forEach((file) => formData.append("files", file));
+
+    return axios
+      .post(`${API_URL}/api/upload/s3`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        console.log("S3 업로드 성공", res.data);
+        return res.data.data;
+      })
+      .catch((err) => {
+        console.error("S3 업로드 실패", err);
+        alert("이미지 업로드 실패");
+        throw err; // 이후 처리 중단 위해 throw
+      });
+  };
+
+  const toggleFacility = (optionId) => {
     setFacilities((prev) => ({
       ...prev,
-      [facility]: !prev[facility],
+      [optionId]: !prev[optionId],
     }));
   };
 
   const addTag = () => {
-    if (newTag.trim() && !userTags.includes(newTag.trim())) {
-      setUserTags((prev) => [...prev, newTag.trim()]);
-      setNewTag("");
+    const trimmed = newTag.trim();
+    if (!trimmed) return;
+
+    // 앞에 #이 없으면 붙이기
+    const formatted = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+
+    if (!userTags.includes(formatted)) {
+      setUserTags((prev) => [...prev, formatted]);
     }
+    setNewTag("");
   };
 
   const removeTag = (tagToRemove) => {
@@ -125,7 +292,63 @@ function TravelRegister() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted", { operatingHours, uploadedImages, userTags });
+
+    const selectedOptionIds = Object.entries(facilities)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([optionId]) => Number(optionId));
+
+    const timeList = Object.entries(operatingHours)
+      .filter(([_, v]) => v.isOpen)
+      .map(([day, v]) => ({
+        dayOfWeek: day,
+        startTime: v.startTime,
+        endTime: v.endTime,
+      }));
+
+    const tagList = userTags.map((tagName) => ({
+      tagNo: null,
+      tagName,
+    }));
+
+    const optionList = selectedOptionIds.map((id) => ({
+      travelOptionNo: id,
+    }));
+
+    // 이미지 업로드 먼저 수행
+    uploadImagesToS3()
+      .then((urls) => {
+        const imageList = urls.map((url) => ({ imageUrl: url }));
+
+        const finalPayload = {
+          title: formData.name,
+          categoryNo: formData.categoryNo,
+          guNo: formData.districtNo,
+          address: formData.address,
+          mapY: formData.latitude,
+          mapX: formData.longitude,
+          tel: formData.phone,
+          email: formData.email,
+          website: formData.website,
+          explain: formData.explain,
+          description: formData.description,
+          timeList,
+          optionList,
+          tagList,
+          imageList, // S3 업로드된 URL 적용
+        };
+
+        return axios.post(`${API_URL}/api/admin/travels`, finalPayload, {
+          headers,
+        });
+      })
+      .then((res) => {
+        alert("여행지 등록 성공!");
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error("여행지 등록 실패:", err);
+        alert("등록 중 오류가 발생했습니다.");
+      });
   };
 
   return (
@@ -145,7 +368,7 @@ function TravelRegister() {
             </h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-8">
             {/* 기본 정보 */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="px-6 py-4">
@@ -170,6 +393,13 @@ function TravelRegister() {
                     <input
                       id="name"
                       type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
                       placeholder="여행지 이름을 입력하세요"
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -184,10 +414,22 @@ function TravelRegister() {
                     </label>
                     <select
                       id="category"
+                      value={formData.categoryNo}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          categoryNo: e.target.value,
+                        }))
+                      }
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="">카테고리를 선택하세요</option>
+                      <option value="">-- 카테고리를 선택하세요 --</option>{" "}
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -201,10 +443,22 @@ function TravelRegister() {
                   </label>
                   <select
                     id="district"
+                    value={formData.districtNo}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        districtNo: e.target.value,
+                      }))
+                    }
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">지역구를 선택하세요</option>
+                    <option value="">-- 지역을 선택하세요 --</option>{" "}
+                    {districts.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -218,6 +472,13 @@ function TravelRegister() {
                   <input
                     id="address"
                     type="text"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }))
+                    }
                     placeholder="상세 주소를 입력하세요"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -236,6 +497,13 @@ function TravelRegister() {
                       id="latitude"
                       type="number"
                       step="any"
+                      value={formData.latitude}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          latitude: e.target.value,
+                        }))
+                      }
                       placeholder="37.5665"
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -252,6 +520,13 @@ function TravelRegister() {
                       id="longitude"
                       type="number"
                       step="any"
+                      value={formData.longitude}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          longitude: e.target.value,
+                        }))
+                      }
                       placeholder="126.9780"
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -271,6 +546,13 @@ function TravelRegister() {
                     <input
                       id="phone"
                       type="tel"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          phone: e.target.value,
+                        }))
+                      }
                       placeholder="010-0000-0000"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -286,6 +568,13 @@ function TravelRegister() {
                     <input
                       id="email"
                       type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
                       placeholder="example@email.com"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -301,10 +590,39 @@ function TravelRegister() {
                     <input
                       id="website"
                       type="url"
+                      value={formData.website}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          website: e.target.value,
+                        }))
+                      }
                       placeholder="https://example.com"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="explain"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    대표 설명
+                  </label>
+                  <textarea
+                    id="explain"
+                    placeholder="여행지 대표 설명을 입력하세요"
+                    rows={2}
+                    value={formData.explain}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        explain: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
 
                 <div>
@@ -318,6 +636,13 @@ function TravelRegister() {
                     id="description"
                     placeholder="여행지에 대한 상세한 설명을 입력하세요"
                     rows={4}
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -336,6 +661,9 @@ function TravelRegister() {
                   <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600 mb-4">
                     이미지를 드래그하거나 클릭하여 업로드하세요
+                    <br />
+                    (첫 번 이미지가 대표 이미지입니다. 최대 5개 이미지 업로드
+                    가능).
                   </p>
                   <button
                     type="button"
@@ -562,26 +890,28 @@ function TravelRegister() {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {facilityItems.map(({ key, label }) => (
+                  {travelOptions.map((option) => (
                     <div
-                      key={key}
+                      key={option.id}
                       className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200"
                     >
                       <span className="text-sm font-medium text-gray-700 flex-1">
-                        {label}
+                        {option.name}
                       </span>
                       <button
                         type="button"
-                        onClick={() => toggleFacility(key)}
+                        onClick={() => toggleFacility(option.id)}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                          facilities[key]
+                          facilities[option.id]
                             ? "bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
                             : "bg-gray-300"
                         }`}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 shadow-sm ${
-                            facilities[key] ? "translate-x-6" : "translate-x-1"
+                            facilities[option.id]
+                              ? "translate-x-6"
+                              : "translate-x-1"
                           }`}
                         />
                       </button>
@@ -594,7 +924,9 @@ function TravelRegister() {
             {/* 버튼 */}
             <div className="flex justify-center gap-4 pt-6">
               <StepButton type="prev">취소</StepButton>
-              <StepButton>등록</StepButton>
+              <StepButton onClick={() => formRef.current?.requestSubmit()}>
+                등록
+              </StepButton>
             </div>
           </form>
         </div>

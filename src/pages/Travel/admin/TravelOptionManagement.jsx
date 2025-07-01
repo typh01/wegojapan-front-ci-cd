@@ -27,9 +27,9 @@ export default function TravelOptionsManagement() {
   };
 
   useEffect(() => {
-    fetchCities(); // 초기 로드 시 시/도 데이터 조회
-    fetchDistricts(); // 구/군도 같이 로딩
-    fetchCategories(); // 카테고리 데이터 조회
+    fetchCities();
+    fetchDistricts();
+    fetchCategories();
     fetchTags();
     fetchThemas();
     fetchOptions();
@@ -120,7 +120,17 @@ export default function TravelOptionsManagement() {
 
   const currentTab = tabs.find((tab) => tab.key === activeTab);
   const currentData = currentTab?.data || [];
-  const currentSetter = currentTab?.setter;
+
+  const formatDateTime = (rawDateStr) => {
+    if (!rawDateStr) return "-";
+    const date = new Date(rawDateStr);
+    const yyyy = date.getFullYear();
+    const MM = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const HH = String(date.getHours()).padStart(2, "0");
+    const mm = String(date.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${MM}-${dd} ${HH}:${mm}`;
+  };
 
   // 시/도 목록 조회 (중복된 함수 제거)
   const fetchCities = () => {
@@ -632,11 +642,18 @@ export default function TravelOptionsManagement() {
     if (filters.dateRange !== "ALL") {
       const today = new Date();
       const itemDate = new Date(item.createdDate);
+
+      // 날짜만 비교하는 함수
+      const isSameDay = (d1, d2) =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+
       const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
 
       switch (filters.dateRange) {
         case "TODAY":
-          matchesDate = daysDiff === 0;
+          matchesDate = isSameDay(today, itemDate);
           break;
         case "WEEK":
           matchesDate = daysDiff <= 7;
@@ -703,8 +720,6 @@ export default function TravelOptionsManagement() {
   const handleSave = () => {
     if (!formData.name.trim()) return;
 
-    const now = new Date().toISOString().split("T")[0];
-
     if (modalType === "add") {
       if (activeTab === "cities") {
         createCity();
@@ -730,34 +745,17 @@ export default function TravelOptionsManagement() {
         createOption();
         return;
       }
-      const newItem = {
-        id: Math.max(...currentData.map((item) => item.id), 0) + 1,
-        name: formData.name,
-        ...(activeTab === "districts" && {
-          cityNo: Number.parseInt(formData.cityNo) || 1,
-        }),
-        ...([
-          "categories",
-          "cities",
-          "districts",
-          "travelOptions",
-          "travelThemas",
-        ].includes(activeTab) && { status: formData.status }),
-        createdDate: now,
-        modifiedDate: now,
-      };
-      currentSetter([...currentData, newItem]);
     } else {
       if (activeTab === "cities") {
-        updateCity(); // 수정 API 호출
+        updateCity();
         return;
       }
       if (activeTab === "districts") {
-        updateDistrict(); // 수정 API 호출
+        updateDistrict();
         return;
       }
       if (activeTab === "categories") {
-        updateCategory(); // 수정 API 호출
+        updateCategory();
         return;
       }
       if (activeTab === "travelTags") {
@@ -772,29 +770,6 @@ export default function TravelOptionsManagement() {
         updateOption();
         return;
       }
-      currentSetter(
-        currentData.map((item) =>
-          item.id === editingItem.id
-            ? {
-                ...item,
-                name: formData.name,
-                ...(activeTab === "districts" && {
-                  cityNo: Number.parseInt(formData.cityNo) || item.cityNo,
-                }),
-                ...([
-                  "categories",
-                  "cities",
-                  "districts",
-                  "travelOptions",
-                  "travelThemas",
-                ].includes(activeTab) && {
-                  status: formData.status,
-                }),
-                modifiedDate: now,
-              }
-            : item
-        )
-      );
     }
 
     closeModal();
@@ -820,7 +795,6 @@ export default function TravelOptionsManagement() {
     if (activeTab === "travelOptions") {
       deleteOption(id);
     } else {
-      currentSetter(currentData.filter((item) => item.id !== id));
       setDeleteConfirm(null);
     }
   };
@@ -1182,10 +1156,10 @@ export default function TravelOptionsManagement() {
                           </td>
                         )}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.createdDate}
+                          {formatDateTime(item.createdDate)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.modifiedDate}
+                          {formatDateTime(item.modifiedDate)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex gap-2">
@@ -1271,7 +1245,7 @@ export default function TravelOptionsManagement() {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="1">시/도를 선택하세요</option>
+                      <option value="">시/도를 선택하세요</option>
                       {cities.map((city) => (
                         <option key={city.id} value={city.id}>
                           {city.name}
@@ -1287,7 +1261,7 @@ export default function TravelOptionsManagement() {
                         위도 (MapY)
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         value={formData.mapY || ""}
                         onChange={(e) =>
                           setFormData({ ...formData, mapY: e.target.value })
@@ -1301,7 +1275,7 @@ export default function TravelOptionsManagement() {
                         경도 (MapX)
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         value={formData.mapX || ""}
                         onChange={(e) =>
                           setFormData({ ...formData, mapX: e.target.value })
