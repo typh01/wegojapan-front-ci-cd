@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+
+const API_BASE_URL = window.ENV?.API_URL + "/api";
 
 const PlannerStep2 = ({
   onDataChange,
@@ -10,109 +13,170 @@ const PlannerStep2 = ({
   const [selectedRegion, setSelectedRegion] = useState(
     initialData.selectedRegion || ""
   );
+  // 지역 목록
+  const [regions, setRegions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const mapRef = useRef(null); // 지도 참조하는 ref
-  const mapInstanceRef = useRef(null); // 맵 인스턴스 저장
-  const selectedMarkerRef = useRef(null); // 선택된 마커 저장
-  const markersRef = useRef([]); // 모든 마커들을 저장하는 배열
+  // 구글 맵 관련
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const selectedMarkerRef = useRef(null);
+  const markersRef = useRef([]);
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrorsState] = useState({
     selectedRegion: "",
   });
 
-  // 오사카의 데이터
-  const osakaRegions = [
-    { id: 1, name: "미야코지마구", lat: 34.701279, lng: 135.52809 },
-    { id: 2, name: "후쿠시마구", lat: 34.692337, lng: 135.472229 },
-    { id: 3, name: "코노하나구", lat: 34.683049, lng: 135.452328 },
-    { id: 4, name: "니시구", lat: 34.676231, lng: 135.486059 },
-    { id: 5, name: "미나토구", lat: 34.663918, lng: 135.460681 },
-    { id: 6, name: "다이쇼구", lat: 34.650403, lng: 135.4727 },
-    { id: 7, name: "텐노지구", lat: 34.657917, lng: 135.519362 },
-    { id: 8, name: "나니와구", lat: 34.659444, lng: 135.49963 },
-    { id: 9, name: "니시요도가와구", lat: 34.711348, lng: 135.456202 },
-    { id: 10, name: "히가시요도가와구", lat: 34.741214, lng: 135.529423 },
-    { id: 11, name: "히가시나리구", lat: 34.670002, lng: 135.541268 },
-    { id: 12, name: "이쿠노구", lat: 34.653751, lng: 135.534413 },
-    { id: 13, name: "아사히구", lat: 34.721177, lng: 135.54422 },
-    { id: 14, name: "조토구", lat: 34.70189, lng: 135.545973 },
-    { id: 15, name: "아베노구", lat: 34.638969, lng: 135.518496 },
-    { id: 16, name: "스미요시구", lat: 34.603673, lng: 135.500632 },
-    { id: 17, name: "히가시스미요시구", lat: 34.622163, lng: 135.526601 },
-    { id: 18, name: "니시나리구", lat: 34.634872, lng: 135.494373 },
-    { id: 19, name: "요도가와구", lat: 34.721026, lng: 135.486711 },
-    { id: 20, name: "츠루미구", lat: 34.704329, lng: 135.574198 },
-    { id: 21, name: "스미노에구", lat: 34.609675, lng: 135.482742 },
-    { id: 22, name: "히라노구", lat: 34.621199, lng: 135.546072 },
-    { id: 23, name: "키타구", lat: 34.705362, lng: 135.510025 },
-    { id: 24, name: "주오구", lat: 34.681261, lng: 135.509801 },
-  ];
-
-  // 초기 데이터가 변경 -> 상태 업데이트
   useEffect(() => {
+    const fetchRegions = () => {
+      setIsLoading(true);
+      setError(null);
+
+      axios
+        .get(`${API_BASE_URL}/admin/travels/gu`)
+        .then((response) => {
+          let regionsData;
+
+          if (
+            response.data &&
+            response.data.data &&
+            Array.isArray(response.data.data)
+          ) {
+            regionsData = response.data.data;
+          } else if (response.data && Array.isArray(response.data)) {
+            regionsData = response.data;
+          } else {
+            throw new Error("서버로부터 받은 데이터 형식이 올바르지 않습니다.");
+          }
+
+          // 백엔드 데이터를 프론트엔드 형식으로 변환
+          const transformedRegions = regionsData
+            .filter((region) => region.guStatus === "Y") // 활성화된 구만 필터링
+            .map((region) => ({
+              id: region.guNo, // guNo -> id
+              name: region.guName, // guName -> name
+              lat: parseFloat(region.guMapY) || 0, // guMapY(위도) -> lat, 숫자 변환
+              lng: parseFloat(region.guMapX) || 0, // guMapX(경도) -> lng, 숫자 변환
+              cityNo: region.cityNo, // 추가 정보 보존
+              cityName: region.cityName, // 추가 정보 보존
+              status: region.guStatus, // 추가 정보 보존
+            }))
+            .filter((region) => region.lat !== 0 && region.lng !== 0);
+
+          console.log("변환된 지역 데이터:", transformedRegions);
+
+          // 데이터가 없는 경우 처리
+          if (transformedRegions.length === 0) {
+            throw new Error(
+              "등록된 구 정보가 없습니다. 관리자에게 문의해주세요."
+            );
+          }
+
+          setRegions(transformedRegions);
+          setError(null);
+
+          console.log(
+            `총 ${transformedRegions.length}개의 구 데이터 로드 완료`
+          );
+        })
+        .catch((err) => {
+          console.error("지역 데이터를 불러오는 데 실패했습니다.", err);
+
+          // 에러 타입별 처리
+          if (err.response) {
+            if (err.response.status === 404) {
+              setError("구 정보를 찾을 수 없습니다. 관리자에게 문의해주세요.");
+            } else if (err.response.status >= 500) {
+              setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            } else {
+              setError(
+                err.response.data?.message ||
+                  "구 정보를 불러오는데 실패했습니다."
+              );
+            }
+          } else if (err.request) {
+            setError("네트워크 연결을 확인해주세요.");
+          } else {
+            setError(err.message || "알 수 없는 오류가 발생했습니다.");
+          }
+        })
+        .finally(() => {
+          // 로딩 종료
+          setIsLoading(false);
+        });
+    };
+
+    fetchRegions();
+  }, []);
+
+  useEffect(() => {
+    console.log("initialData 변경:", initialData);
+    console.log("초기 선택된 지역:", initialData.selectedRegion);
     setSelectedRegion(initialData.selectedRegion || "");
   }, [initialData]);
 
-  // 구글 맵 초기화
   useEffect(() => {
-    const apiKey = window.ENV.GOOGLE_MAPS_API_KEY;
-    console.log("Google Maps API Key:", apiKey ? "설정완료" : "설정실패");
+    const apiKey = window.ENV?.GOOGLE_MAPS_API_KEY;
 
     const initMap = () => {
-      if (window.google && window.google.maps && mapRef.current) {
+      if (
+        window.google &&
+        window.google.maps &&
+        mapRef.current &&
+        regions.length > 0
+      ) {
+        console.log("Google Maps 초기화 시작, 지역 개수:", regions.length);
+
         const map = new window.google.maps.Map(mapRef.current, {
-          // 오사카 중심 좌표로 지도 생성
           center: { lat: 34.6937, lng: 135.5023 }, // 오사카 중심 좌표
           zoom: 12,
-
-          // 지도 옵션 설정
-          mapTypeControl: true,
-          mapTypeControlOptions: {
-            style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: window.google.maps.ControlPosition.TOP_CENTER,
-          },
-
-          streetViewControl: false,
-          streetViewControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_BOTTOM,
-          },
-
-          zoomControl: true,
-          zoomControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_CENTER,
-          },
-
-          fullscreenControl: true,
-          fullscreenControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_TOP,
-          },
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }],
+            },
+          ],
         });
-        mapInstanceRef.current = map;
+        mapInstanceRef.current = map; // 맵 인스턴스 저장
 
-        // 각 지역에 마커 추가
-        osakaRegions.forEach((region) => {
+        // 기존 마커들 제거
+        markersRef.current.forEach((markerData) =>
+          markerData.marker.setMap(null)
+        );
+        markersRef.current = [];
+
+        // 각 지역에 대해 마커 생성
+        regions.forEach((region) => {
+          // 좌표가 유효한지 확인
+          if (
+            isNaN(region.lat) ||
+            isNaN(region.lng) ||
+            region.lat === 0 ||
+            region.lng === 0
+          ) {
+            console.warn(`좌표가 유효하지 않은 지역 스킵 : ${region.name}`);
+            return;
+          }
+
           const marker = new window.google.maps.Marker({
             position: { lat: region.lat, lng: region.lng },
-            map: map,
-            title: region.name,
+            map: map, // 마커가 표시될 맵
+            title: region.name, // 마커 제목 (호버 시 표시)
             icon: {
               url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
               scaledSize: new window.google.maps.Size(32, 32),
             },
           });
 
-          // 마커 클릭 이벤트 리스너
           marker.addListener("click", () => {
             handleRegionSelect(region.name, marker);
           });
 
-          // 마커를 배열에 저장
           markersRef.current.push({ marker, regionName: region.name });
         });
 
-        console.log(`${osakaRegions.length}개 마커 생성 완료`);
-
-        // 초기 데이터에 선택된 지역이 있으면 해당 마커를 선택 상태로
         if (initialData.selectedRegion) {
           const initialMarker = markersRef.current.find(
             (item) => item.regionName === initialData.selectedRegion
@@ -120,46 +184,67 @@ const PlannerStep2 = ({
           if (initialMarker) {
             updateMarkerStyle(initialMarker.marker, true);
             selectedMarkerRef.current = initialMarker.marker;
+
+            // 선택된 지역으로 맵 중심 이동
+            const selectedRegionData = regions.find(
+              (region) => region.name === initialData.selectedRegion
+            );
+            if (selectedRegionData) {
+              map.panTo({
+                lat: selectedRegionData.lat,
+                lng: selectedRegionData.lng,
+              });
+              map.setZoom(14);
+            }
           }
         }
-      } else {
-        console.error("구글 맵 API 로드 실패 또는 mapRef가 준비되지 않음");
       }
     };
 
-    // 구글 맵 API가 로드되어 있는지 확인
-    if (window.google && window.google.maps) {
-      console.log("구글 맵 API가 이미 로드되어 있음");
-      initMap();
-    } else {
-      console.log("구글 맵 API 스크립트 로드 중...");
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        initMap();
-      };
-      document.head.appendChild(script);
+    // 지역 데이터가 로드된 후 맵 초기화
+    if (regions.length > 0) {
+      if (apiKey) {
+        if (window.google && window.google.maps) {
+          initMap();
+        } else {
+          const script = document.createElement("script");
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+          script.async = true;
+          script.defer = true;
+          script.onload = initMap;
+          script.onerror = () => {
+            console.error("Google Maps API 로드 실패");
+            setError(
+              "지도를 불러올 수 없습니다. 새로고침 후 다시 시도해주세요."
+            );
+          };
+          document.head.appendChild(script); // 스크립트 추가
 
-      return () => {
-        if (document.head.contains(script)) {
-          document.head.removeChild(script);
+          // 컴포넌트 언마운트 시 스크립트 제거
+          return () => {
+            if (document.head.contains(script)) {
+              document.head.removeChild(script);
+            }
+          };
         }
-      };
+      } else {
+        console.warn(
+          "Google Maps API 키가 설정되지 않았습니다. 지도 없이 지역 목록만 표시됩니다."
+        );
+      }
     }
-  }, [initialData.selectedRegion]);
+  }, [regions, initialData.selectedRegion]);
 
   // 마커 스타일 업데이트
   const updateMarkerStyle = (marker, isSelected) => {
     if (isSelected) {
-      // 선택된 마커는 파란색으로 변경
+      // 선택된 마커: 파란색, 큰 크기
       marker.setIcon({
         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
         scaledSize: new window.google.maps.Size(40, 40),
       });
     } else {
-      // 선택되지 않은 마커는 빨간색으로
+      // 기본 마커: 빨간색, 작은 크기
       marker.setIcon({
         url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
         scaledSize: new window.google.maps.Size(32, 32),
@@ -167,24 +252,26 @@ const PlannerStep2 = ({
     }
   };
 
-  // 지역 선택 처리
+  // 지역 선택 처리 함수
   const handleRegionSelect = (regionName, marker) => {
+    console.log("지역 선택:", regionName);
+
     if (selectedMarkerRef.current) {
       updateMarkerStyle(selectedMarkerRef.current, false);
     }
 
-    updateMarkerStyle(marker, true);
-    selectedMarkerRef.current = marker;
+    if (marker) {
+      updateMarkerStyle(marker, true);
+      selectedMarkerRef.current = marker;
+    }
 
-    // 선택된 지역 상태 업데이트
     setSelectedRegion(regionName);
 
-    // 부모 컴포넌트에 데이터 변경 알림
     updateData(regionName);
 
-    // 선택된 지역으로 지도 중심 이동
+    // 맵 중심을 선택된 지역으로 이동
     if (mapInstanceRef.current) {
-      const selectedRegionData = osakaRegions.find(
+      const selectedRegionData = regions.find(
         (region) => region.name === regionName
       );
       if (selectedRegionData) {
@@ -192,56 +279,92 @@ const PlannerStep2 = ({
           lat: selectedRegionData.lat,
           lng: selectedRegionData.lng,
         });
-        mapInstanceRef.current.setZoom(14);
+        mapInstanceRef.current.setZoom(14); // 줌 레벨 증가
       }
     }
   };
 
-  // 유효성 검사 함수
   const validateData = (selectedRegionName) => {
-    const newErrors = {
-      selectedRegion: "",
-    };
-
+    const newErrors = { selectedRegion: "" };
     let isValid = true;
 
-    // 선택된 지역이 없는 경우
     if (!selectedRegionName) {
       newErrors.selectedRegion = "방문할 지역을 선택해주세요.";
       isValid = false;
     }
 
-    setErrors(newErrors);
-
+    setErrorsState(newErrors);
     return { isValid, errors: newErrors };
   };
 
-  // 데이터 업데이트와 부모 컴포넌트에 알림
   const updateData = (selectedRegionName) => {
     const validationResult = validateData(selectedRegionName);
-
-    onDataChange({
-      selectedRegion: selectedRegionName,
-    });
-
+    onDataChange({ selectedRegion: selectedRegionName });
     onValidationChange(validationResult.isValid);
   };
 
+  // 로딩 중 UI
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="text-gray-600">오사카 구 정보를 불러오는 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 발생 시 UI
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="text-center p-8">
+          <div className="text-red-600 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.502 0L3.232 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+          </div>
+          <div className="text-red-800 font-medium mb-2">데이터 로드 실패</div>
+          <div className="text-red-600 text-sm mb-4">{error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+          >
+            새로고침
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 메인 렌더링
   return (
-    /* 메인 컨테이너 */
     <div className="max-h-[600px] overflow-y-auto space-y-4">
-      {/* 지도 컨테이너 - 높이를 더 크게 설정 */}
+      {/* 구글 맵 컨테이너 */}
       <div className="relative">
         <div
-          ref={mapRef}
+          ref={mapRef} // 맵이 렌더링될 DOM 요소
           className="w-full h-96 rounded-lg border border-gray-300 shadow-sm"
-          style={{ minHeight: "384px" }}
+          style={{ minHeight: "384px" }} // 최소 높이 설정
         />
-
-        {/* 지도 로딩 중 표시 */}
-        {!mapInstanceRef.current && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-            <div className="text-gray-500">지도를 불러오는 중...</div>
+        {/* 맵 로딩 오버레이 */}
+        {regions.length > 0 && !window.google && (
+          <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="text-gray-600 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <div className="text-sm">지도를 불러오는 중...</div>
+            </div>
           </div>
         )}
       </div>
@@ -252,12 +375,7 @@ const PlannerStep2 = ({
           <div className="flex items-center space-x-2">
             {/* 체크 아이콘 */}
             <div className="w-5 h-5 text-blue-600">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -266,6 +384,7 @@ const PlannerStep2 = ({
                 />
               </svg>
             </div>
+            {/* 선택된 지역 텍스트 */}
             <span className="text-blue-800 font-medium text-sm">
               선택된 지역: {selectedRegion}
             </span>
@@ -273,31 +392,31 @@ const PlannerStep2 = ({
         </div>
       )}
 
-      {/* 지역 리스트  */}
+      {/* 지역 목록 그리드 */}
       <div className="bg-gray-50 rounded-lg p-3">
         <h3 className="text-sm font-medium text-gray-700 mb-2">
-          오사카시 24개 구(區) 목록
+          오사카시 구(區) 목록 ({regions.length}개)
         </h3>
+        {/* 4열 그리드로 지역 목록 표시 */}
         <div className="grid grid-cols-4 gap-1 text-xs">
-          {osakaRegions.map((region) => (
+          {regions.map((region) => (
             <div
-              key={region.id}
+              key={region.id} // 고유 키
               className={`p-1.5 rounded cursor-pointer transition-colors duration-200 text-center ${
                 selectedRegion === region.name
-                  ? "bg-blue-100 text-blue-800 font-medium"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-100 text-blue-800 font-medium" // 선택된 지역 스타일
+                  : "bg-white text-gray-600 hover:bg-gray-100" // 기본 지역 스타일
               }`}
               onClick={() => {
-                // 리스트에서도 지역 선택 가능
+                // 지역 클릭 시 해당 마커 찾아서 선택 처리
                 const markerData = markersRef.current.find(
                   (item) => item.regionName === region.name
                 );
-                if (markerData) {
-                  handleRegionSelect(region.name, markerData.marker);
-                }
+                handleRegionSelect(region.name, markerData?.marker);
               }}
+              title={`${region.name} (${region.cityName})`}
             >
-              {region.name}
+              {region.name} {/* 지역 이름 표시 */}
             </div>
           ))}
         </div>
@@ -307,19 +426,13 @@ const PlannerStep2 = ({
       {showErrors && errors.selectedRegion && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <div className="flex items-center space-x-2">
-            {/* 경고 아이콘 */}
             <div className="w-5 h-5 text-red-600">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
             </div>
@@ -330,7 +443,7 @@ const PlannerStep2 = ({
         </div>
       )}
 
-      {/* 사용 안내 */}
+      {/* 안내 메시지 */}
       <div className="text-xs text-gray-500 text-center pb-2">
         지도의 마커를 클릭하거나 아래 지역 목록에서 선택해주세요.
       </div>
