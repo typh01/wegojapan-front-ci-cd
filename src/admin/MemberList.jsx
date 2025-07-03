@@ -1,49 +1,63 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import StepButton from "../components/common/MyPlan/StepButton";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../components/Context/AuthContext";
 
 const MemberList = () => {
+  const [memberList, setMemberList] = useState([]);
+  const [roles, setRoles] = useState({});
+
   const navigate = useNavigate();
-  const handleSave = (e) => {
-    e.preventDefault();
-    alert("저장되었습니다.");
-    navigate("/adminPage");
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
+  const { auth } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!auth.tokens.accessToken) return; //새로고침 할 때 로딩하는데 토큰 불러오는 시간이 있어서 tokens.accesstoken을 붙여줘야함
+
+    axios
+      .get(`${apiUrl}/api/admin/members`, {
+        params: {
+          page: 1,
+          status: "Y",
+          role: "",
+        },
+        headers: {
+          Authorization: `Bearer ${auth.tokens.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setMemberList(response.data.data);
+      })
+      .catch((error) => {
+        console.error("회원 조회 실패:", error);
+      });
+  }, [auth]);
+
+  const handleSave = (memberNo) => {
+    const selectedRole = roles[memberNo];
+    axios
+      .put(`${apiUrl}/api/admin/${memberNo}/role`, null, {
+        params: {
+          role: selectedRole,
+        },
+        headers: {
+          Authorization: `Bearer ${auth.tokens.accessToken}`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        alert("저장되었습니다.");
+        navigate("/adminPage");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const handleCancel = () => {
     navigate("/adminPage");
   };
-
-  // 더미 데이터
-  const dummyMembers = [
-    {
-      no: 12,
-      id: "abcd1234",
-      name: "김한슬",
-      joinedAt: "2025.04.10",
-      role: "관리자",
-      isActive: true,
-      isBanned: false,
-    },
-    {
-      no: 11,
-      id: "asasas111",
-      name: "이성민",
-      joinedAt: "2025.04.10",
-      role: "관리자",
-      isActive: false,
-      isBanned: false,
-    },
-    {
-      no: 10,
-      id: "asasas111",
-      name: "이성민",
-      joinedAt: "2025.04.10",
-      role: "사용자",
-      isActive: true,
-      isBanned: true,
-    },
-  ];
 
   return (
     <div className="p-6">
@@ -58,34 +72,46 @@ const MemberList = () => {
             <th>가입일</th>
             <th>역할</th>
             <th>상태</th>
+            <th>액션</th>
           </tr>
         </thead>
         <tbody>
-          {dummyMembers.map((member) => (
-            <tr key={member.no} className="border-b">
-              <td className="py-2">{member.no}</td>
-              <td>{member.id}</td>
-              <td>{member.name}</td>
-              <td>{member.joinedAt}</td>
+          {memberList.map((member) => (
+            <tr key={member.memberNo} className="border-b">
+              <td className="py-2">{member.memberNo}</td>
+              <td>{member.memberId}</td>
+              <td>{member.memberName}</td>
+              <td>{member.enrollDate}</td>
               <td>
                 <select
-                  defaultValue={member.role}
+                  value={roles[member.memberNo] ?? member.memberRole}
+                  onChange={(e) =>
+                    setRoles((prev) => ({
+                      ...prev,
+                      [member.memberNo]: e.target.value,
+                    }))
+                  }
                   className="border rounded px-2 py-1"
-                  disabled={!member.isActive}
+                  disabled={member.isActive !== "Y"}
                 >
-                  <option value="사용자">사용자</option>
-                  <option value="관리자">관리자</option>
+                  <option value="ROLE_USER">사용자</option>
+                  <option value="ROLE_ADMIN">관리자</option>
                 </select>
               </td>
               <td>
-                {member.isActive ? (
-                  member.isBanned ? (
-                    <span className="text-yellow-500 font-semibold">정지</span>
-                  ) : (
-                    <span className="text-green-500 font-semibold">정상</span>
-                  )
+                {member.isActive === "Y" ? (
+                  <span className="text-green-500 font-semibold">정상</span>
                 ) : (
                   <span className="text-red-500 font-semibold">탈퇴</span>
+                )}
+              </td>
+              <td>
+                {member.isActive === "Y" && (
+                  <div className="flex justify-center">
+                    <StepButton onClick={() => handleSave(member.memberNo)}>
+                      저장
+                    </StepButton>
+                  </div>
                 )}
               </td>
             </tr>
@@ -95,7 +121,6 @@ const MemberList = () => {
 
       {/* 저장 / 취소 버튼 */}
       <div className="flex gap-4 justify-center mt-6">
-        <StepButton onClick={handleSave}>저장</StepButton>
         <StepButton type="prev" onClick={handleCancel}>
           취소
         </StepButton>
