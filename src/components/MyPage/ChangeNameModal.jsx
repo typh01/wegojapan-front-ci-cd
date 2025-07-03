@@ -4,8 +4,8 @@ import { AuthContext } from "../Context/AuthContext";
 import axios from "axios";
 
 const ChangeNameModal = ({ onClose }) => {
-  const { auth, memberNo } = useContext(AuthContext);
-
+  const { auth } = useContext(AuthContext);
+  const memberNo = auth?.loginInfo?.memberNo;
   const [memberName, setMemberName] = useState("");
   const [checkResult, setCheckResult] = useState(null);
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
