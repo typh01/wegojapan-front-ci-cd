@@ -1,18 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import StepButton from "../common/MyPlan/StepButton";
+import { AuthContext } from "../Context/AuthContext";
+import axios from "axios";
 
 const DeleteMember = () => {
   const [password, setPassword] = useState("");
-
+  const { auth } = useContext(AuthContext);
+  const memberNo = auth?.loginInfo?.memberNo;
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
   const handleConfirm = () => {
     if (!password.trim()) {
       setError("비밀번호를 입력해주세요.");
       return;
     }
+
+    axios
+      .delete(`${apiUrl}/api/members/deleteMember`, {
+        data: {
+          memberNo: memberNo,
+          memberPw: password,
+        },
+        headers: {
+          Authorization: `Bearer ${auth.tokens.accessToken}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setPassword("");
+          alert("회원 탈퇴가 완료되었습니다.");
+          navigate("/login");
+        }
+      })
+      .catch((err) => {
+        console.error("요청 실패:", err);
+        setError("회원 탈퇴 요청이 실패했습니다.");
+      });
   };
 
   const handleCancel = () => {

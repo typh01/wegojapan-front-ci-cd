@@ -1,46 +1,76 @@
 import { useState, useContext } from "react";
 import { nameRegex } from "../Auth/Regex";
 import { AuthContext } from "../Context/AuthContext";
+import axios from "axios";
 
 const ChangeNameModal = ({ onClose }) => {
   const { auth } = useContext(AuthContext);
-  const memberId = auth?.loginInfo?.memberId;
-
-  const [nickname, setNickname] = useState("");
+  const memberNo = auth?.loginInfo?.memberNo;
+  const [memberName, setMemberName] = useState("");
   const [checkResult, setCheckResult] = useState(null);
-
-  const dummyUsers = [
-    { memberId: "aaa", nickname: "현우짱" },
-    { memberId: "bbb", nickname: "야구고수" },
-    { memberId: "ccc", nickname: "takenname" },
-  ];
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
 
   const handleCheck = () => {
-    if (!nameRegex.test(nickname)) {
+    if (!nameRegex.test(memberName)) {
       alert("닉네임은 한글 또는 영문 2~10자만 가능합니다.");
       return;
     }
 
-    // axios로 대체 예정
-    const isDuplicate = dummyUsers.some(
-      (user) => user.nickname === nickname && user.memberId !== memberId
-    );
-    setCheckResult(!isDuplicate);
+    axios
+      .get(
+        `${apiUrl}/api/members/checkedMemberName`,
+        {
+          params: {
+            newMemberName: memberName,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.tokens.accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        setCheckResult(true);
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("닉네임 중복확인을 먼저 해주세요.");
+      });
   };
 
   const handleChange = () => {
-    if (!nameRegex.test(nickname)) {
+    if (!nameRegex.test(memberName)) {
       alert("닉네임은 한글 또는 영문 2~10자만 가능합니다.");
       return;
     }
 
-    if (!checkResult) {
-      alert("닉네임 중복확인을 먼저 해주세요.");
-      return;
-    }
+    console.log(memberName);
 
-    alert("닉네임이 변경되었습니다.");
-    onClose();
+    axios
+      .patch(
+        `${apiUrl}/api/members/changeName`,
+        {
+          memberNo: memberNo,
+          newMemberName: memberName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.tokens.accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          setMemberName(memberName);
+          alert("닉네임이 변경되었습니다.");
+          onClose();
+        }
+      })
+      .catch((err) => {
+        console.error("요청 실패:", err);
+      });
   };
 
   return (
@@ -55,9 +85,9 @@ const ChangeNameModal = ({ onClose }) => {
         <div className="flex gap-2 mb-4">
           <input
             type="text"
-            value={nickname}
+            value={memberName}
             onChange={(e) => {
-              setNickname(e.target.value);
+              setMemberName(e.target.value);
               setCheckResult(null);
             }}
             placeholder="새 닉네임 입력"
@@ -71,12 +101,12 @@ const ChangeNameModal = ({ onClose }) => {
           </button>
         </div>
 
-        {nickname.length > 0 && !nameRegex.test(nickname) && (
+        {memberName.length > 0 && !nameRegex.test(memberName) && (
           <p className="text-sm text-red-500 mb-2">
             닉네임은 한글 또는 영문 2~10자만 가능합니다.
           </p>
         )}
-        {checkResult !== null && nameRegex.test(nickname) && (
+        {checkResult !== null && nameRegex.test(memberName) && (
           <p
             className={`text-sm mb-4 ${
               checkResult ? "text-blue-500" : "text-red-500"
