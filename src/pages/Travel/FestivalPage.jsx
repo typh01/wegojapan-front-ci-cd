@@ -74,7 +74,7 @@ function FestivalPage() {
 
   const fetchCategories = () => {
     axios
-      .get(`${API_URL}/api/travels/category`, { headers })
+      .get(`${API_URL}/api/travels/category`)
       .then((res) => {
         const categoryList = res.data.data.map((cat) => ({
           id: cat.categoryNo,

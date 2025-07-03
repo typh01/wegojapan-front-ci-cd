@@ -29,12 +29,15 @@ import DeleteMember from "./components/MyPage/DeleteMember";
 import AdminPage from "./admin/AdminPage";
 import MemberList from "./admin/MemberList";
 
+import ReviewReportList from "./admin/ReviewReportList";
+import TravelReportList from "./admin/TravelReportList";
+
 function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="max-w-[1440px] mx-auto px-6 py-8">
+        <main className="max-w-[1440px] mx-auto px-6 py-8 pb-[145px]">
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route
@@ -44,7 +47,6 @@ function App() {
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/customer-service" element={<CustomerCenter />} />
             <Route path="/myplan" element={<StepIndicator />} />
-
             {/* 로그인 유저 */}
             <Route path="/signUp" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
@@ -55,10 +57,17 @@ function App() {
             <Route path="/myPage" element={<MyPage />} />
             <Route path="/myPage/changePassword" element={<ChangePassword />} />
             <Route path="/myPage/deleteMember" element={<DeleteMember />} />
-
             {/* 관리자 전용 */}
             <Route path="/adminPage" element={<AdminPage />} />
             <Route path="/adminPage/memberList" element={<MemberList />} />
+            <Route
+              path="/adminPage/reviewReportList"
+              element={<ReviewReportList />}
+            />
+            <Route
+              path="/adminPage/travelReportList"
+              element={<TravelReportList />}
+            />
 
             {/* 사용자 여행지 */}
             <Route path="/travels" element={<TravelPage />} />
@@ -68,9 +77,9 @@ function App() {
             />
             <Route path="/travels/detail" element={<TravelDetailPage />} />
             <Route path="/festivals" element={<FestivalPage />} />
-
             {/* 여행지 관련 관리자 기능 */}
             <Route path="/admin/travels" element={<TravelRegister />} />
+            <Route path="/admin/travels/:id" element={<TravelRegister />} />
             <Route path="/admin/festivals" element={<FestivalRegister />} />
             <Route
               path="/admin/travels/management"
@@ -80,14 +89,12 @@ function App() {
               path="/admin/travels/options/management"
               element={<TravelOptionsManagement />}
             />
-
             {/* 나의 여행 플랜 */}
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
             <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </AuthProvider>

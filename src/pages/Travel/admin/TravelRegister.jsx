@@ -169,13 +169,9 @@ function TravelRegister() {
           website: d.website,
           explain: d.explain,
           description: d.description,
+          imageList: d.imageList || [],
         });
-        // 편의시설, 시간, 태그, 이미지 초기화
-        const opts = {};
-        d.optionList.forEach((o) => {
-          opts[o.travelOptionNo] = true;
-        });
-        setFacilities(opts);
+        // 2) 운영 시간 세팅 (기본 false로 초기화 후 서버 데이터 덮어쓰기)
         const hours = {};
         days.forEach((day) => {
           hours[day] = { isOpen: false, startTime: "09:00", endTime: "18:00" };
@@ -188,8 +184,21 @@ function TravelRegister() {
           };
         });
         setOperatingHours(hours);
-        setUserTags(d.tagList.map((t) => t.tagName));
-        setUploadedImages(d.imageList.map((img) => ({ url: img.imageUrl })));
+
+        // 3) 옵션 토글 스위치 세팅
+        const opts = {};
+        d.optionListForView.forEach((o) => {
+          opts[o.optionNo] = true;
+        });
+        setFacilities(opts);
+
+        // 4) 사용자 태그 세팅
+        setUserTags(d.tagListForView.map((t) => t.tagName));
+
+        // 5) 이미지 (기존 URL 로딩)
+        // 기존 File 객체와 구분하기 위해 url 프로퍼티로 래핑
+        const wrapped = d.imageList.map((img) => ({ url: img.imageUrl }));
+        setUploadedImages(wrapped);
       })
       .catch(() => alert("데이터 로드 실패"));
   };
@@ -229,14 +238,15 @@ function TravelRegister() {
 
   const handleImageUpload = (e) => {
     const MAX_IMAGES = 5;
-    const files = Array.from(e.target.files || []);
+    const newFiles = Array.from(e.target.files || []).map((f) => ({ file: f }));
+
     setUploadedImages((prev) => {
-      const total = prev.length + files.length;
+      const total = prev.length + newFiles.length;
       if (total > MAX_IMAGES) {
         alert(`이미지는 최대 ${MAX_IMAGES}장까지만 업로드할 수 있습니다.`);
-        return [...prev, ...files.slice(0, MAX_IMAGES - prev.length)];
+        return [...prev, ...newFiles.slice(0, MAX_IMAGES - prev.length)];
       }
-      return [...prev, ...files];
+      return [...prev, ...newFiles];
     });
   };
 
@@ -244,9 +254,9 @@ function TravelRegister() {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const uploadImagesToS3 = () => {
+  const uploadImagesToS3 = (files) => {
     const formData = new FormData();
-    uploadedImages.forEach((file) => formData.append("files", file));
+    files.forEach((file) => formData.append("files", file));
 
     return axios
       .post(`${API_URL}/api/upload/s3`, formData, {
@@ -293,31 +303,46 @@ function TravelRegister() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const selectedOptionIds = Object.entries(facilities)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([optionId]) => Number(optionId));
+    // ① 기존에 있던 URL
+    const existingUrls = uploadedImages
+      .filter((item) => item.url)
+      .map((item) => item.url);
 
-    const timeList = Object.entries(operatingHours)
-      .filter(([_, v]) => v.isOpen)
-      .map(([day, v]) => ({
-        dayOfWeek: day,
-        startTime: v.startTime,
-        endTime: v.endTime,
-      }));
+    // ② 새로 선택된 File[] 추출
+    const newFiles = uploadedImages
+      .filter((item) => item.file)
+      .map((item) => item.file);
 
-    const tagList = userTags.map((tagName) => ({
-      tagNo: null,
-      tagName,
-    }));
+    // ③ 새 파일만 S3에 업로드 (없으면 빈 배열)
+    const uploadPromise = newFiles.length
+      ? uploadImagesToS3(newFiles) // 새로운 파일(newFiles)만 서버에 보냅니다.
+      : Promise.resolve([]);
 
-    const optionList = selectedOptionIds.map((id) => ({
-      travelOptionNo: id,
-    }));
+    uploadPromise
+      .then((newUrls) => {
+        // ④ 전체 URL 리스트
+        const allUrls = [...existingUrls, ...newUrls];
 
-    // 이미지 업로드 먼저 수행
-    uploadImagesToS3()
-      .then((urls) => {
-        const imageList = urls.map((url) => ({ imageUrl: url }));
+        // ⑤ 페이로드용 imageList
+        const imageList = allUrls.map((url) => ({ imageUrl: url }));
+
+        // 기존에 쓰던 로직 그대로…
+        const timeList = Object.entries(operatingHours)
+          .filter(([_, v]) => v.isOpen)
+          .map(([day, v]) => ({
+            dayOfWeek: day,
+            startTime: v.startTime,
+            endTime: v.endTime,
+          }));
+
+        const optionList = Object.entries(facilities)
+          .filter(([_, sel]) => sel)
+          .map(([id]) => ({ travelOptionNo: Number(id) }));
+
+        const tagList = userTags.map((tagName) => ({
+          tagNo: null,
+          tagName,
+        }));
 
         const finalPayload = {
           title: formData.name,
@@ -334,20 +359,27 @@ function TravelRegister() {
           timeList,
           optionList,
           tagList,
-          imageList, // S3 업로드된 URL 적용
+          imageList, // ← 업데이트된 전체 리스트
         };
 
-        return axios.post(`${API_URL}/api/admin/travels`, finalPayload, {
-          headers,
-        });
+        // ⑥ 등록/수정 요청
+        const request = isEdit
+          ? axios.put(`${API_URL}/api/admin/travels/${id}`, finalPayload, {
+              headers,
+            })
+          : axios.post(`${API_URL}/api/admin/travels`, finalPayload, {
+              headers,
+            });
+
+        return request;
       })
-      .then((res) => {
-        alert("여행지 등록 성공!");
-        console.log(res.data);
+      .then(() => {
+        alert(isEdit ? "수정 성공!" : "등록 성공!");
+        navigate(-1);
       })
       .catch((err) => {
-        console.error("여행지 등록 실패:", err);
-        alert("등록 중 오류가 발생했습니다.");
+        console.error("오류 발생:", err);
+        alert("이미지 업로드 또는 요청 처리 중 오류가 발생했습니다.");
       });
   };
 
@@ -364,7 +396,7 @@ function TravelRegister() {
           >
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <MapPin className="h-6 w-6" />
-              여행지 등록
+              {isEdit ? "여행지 수정" : "여행지 등록"}
             </h1>
           </div>
 
@@ -684,12 +716,14 @@ function TravelRegister() {
 
                 {uploadedImages.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {uploadedImages.map((file, index) => (
+                    {uploadedImages.map((item, index) => (
                       <div key={index} className="relative">
                         <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                           <img
                             src={
-                              URL.createObjectURL(file) || "/placeholder.svg"
+                              item.url
+                                ? item.url
+                                : URL.createObjectURL(item.file)
                             }
                             alt={`Upload ${index + 1}`}
                             className="w-full h-full object-cover rounded-lg"
@@ -925,7 +959,7 @@ function TravelRegister() {
             <div className="flex justify-center gap-4 pt-6">
               <StepButton type="prev">취소</StepButton>
               <StepButton onClick={() => formRef.current?.requestSubmit()}>
-                등록
+                {isEdit ? "수정" : "등록"}
               </StepButton>
             </div>
           </form>
