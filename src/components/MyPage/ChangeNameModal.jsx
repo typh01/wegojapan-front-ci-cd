@@ -4,8 +4,7 @@ import { AuthContext } from "../Context/AuthContext";
 import axios from "axios";
 
 const ChangeNameModal = ({ onClose }) => {
-  const { auth } = useContext(AuthContext);
-  const memberNo = auth?.loginInfo?.memberNo;
+  const { auth, memberNo } = useContext(AuthContext);
 
   const [memberName, setMemberName] = useState("");
   const [checkResult, setCheckResult] = useState(null);
@@ -16,11 +15,29 @@ const ChangeNameModal = ({ onClose }) => {
       alert("닉네임은 한글 또는 영문 2~10자만 가능합니다.");
       return;
     }
-    if (!checkResult) {
-      alert("닉네임 중복확인을 먼저 해주세요.");
-      setCheckResult(true);
-      return;
-    }
+
+    axios
+      .get(
+        `${apiUrl}/api/members/checkedMemberName`,
+        {
+          params: {
+            newMemberName: memberName,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.tokens.accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        setCheckResult(true);
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("닉네임 중복확인을 먼저 해주세요.");
+      });
   };
 
   const handleChange = () => {

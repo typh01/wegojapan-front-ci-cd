@@ -45,12 +45,12 @@ const AdminPage = () => {
         {
           src: "/여행지등록.png",
           text: "여행지 등록",
-          path: "/adminPage/trip/register",
+          path: "/admin/travels",
         },
         {
           src: "/여행지관리.png",
           text: "여행지 관리",
-          path: "/adminPage/trip/manage",
+          path: "/admin/travels/management",
         },
       ],
     },

@@ -20,6 +20,7 @@ const ReviewReportModal = ({ isOpen, onClose, author, postTitle }) => {
       alert("신고 사유를 선택해주세요.");
       return;
     }
+
     alert("신고가 완료되었습니다.");
     onClose();
   };
