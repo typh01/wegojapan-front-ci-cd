@@ -10,40 +10,43 @@ import {
   Plus,
 } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function TravelAdminManagement() {
   // 필터 및 페이징 상태
   const [activeThema, setActiveThema] = useState("전체");
   const [periodFilter, setPeriodFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // 입력 중인 값
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState(""); // 실제 적용된 검색어
+  const [isSearchMode, setIsSearchMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showThemaModal, setShowThemaModal] = useState(false);
   const [selectedTravelId, setSelectedTravelId] = useState(null);
-  const [travelData, setTravelData] = useState([
-    {
-      no: 1,
-      name: "오사카 성",
-      registrationDate: "2023.07.24",
-      modificationDate: "2023.07.25",
-      status: "등록완료",
-      isActive: true,
-      themes: ["문화/역사"],
-    },
-  ]);
+  const [travelData, setTravelData] = useState([]);
 
   // 테마 목록 상태
   const [themas, setThemas] = useState(["전체"]);
-  const totalPages = 7;
+  const [totalPages, setTotalPages] = useState(1);
 
   // API 설정
   const API_URL = window.ENV.API_URL;
   const token = JSON.parse(localStorage.getItem("tokens"))?.accessToken;
   const headers = { Authorization: `Bearer ${token}` };
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchThemas();
   }, []);
+
+  useEffect(() => {
+    if (!isSearchMode) {
+      fetchTravelList(currentPage);
+    } else {
+      handleSearch(currentPage); // 현재 페이지 검색 재요청
+    }
+  }, [currentPage, isSearchMode]);
 
   // 테마 목록 조회
   const fetchThemas = () => {
@@ -62,28 +65,153 @@ export default function TravelAdminManagement() {
       .catch((err) => console.error("테마 목록 조회 실패:", err));
   };
 
-  // 모달 상태
+  // 여행지 리스트 + 테마 병합해서 가져오는 함수
+  const fetchTravelList = (page) => {
+    axios
+      .get(`${API_URL}/api/admin/travels/list`, {
+        params: {
+          page,
+          size: 10,
+        },
+        headers,
+      })
+      .then((res) => {
+        const { data, total } = res.data.data; // PageResponse 기준
+        setTotalPages(Math.ceil(total / 10));
 
-  // 상태 토글
-  const handleStatusToggle = (no) => {
-    setTravelData((prev) =>
-      prev.map((item) =>
-        item.no === no
-          ? {
-              ...item,
-              isActive: !item.isActive,
-              status: item.isActive ? "비활성" : "등록완료",
-            }
-          : item
-      )
-    );
+        return Promise.all(
+          data.map((travel) =>
+            axios
+              .all([
+                axios.get(`${API_URL}/api/admin/travels/${travel.travelNo}`, {
+                  headers,
+                }),
+                axios.get(
+                  `${API_URL}/api/admin/travels/${travel.travelNo}/themas`,
+                  { headers }
+                ),
+              ])
+              .then(([detailRes, themaRes]) => {
+                const detail = detailRes.data.data;
+                return {
+                  no: detail.travelNo,
+                  name: detail.title,
+                  registrationDate: detail.createdDate
+                    ?.replace("T", " ")
+                    .substring(0, 16),
+                  modificationDate: detail.modifiedDate
+                    ?.replace("T", " ")
+                    .substring(0, 16),
+
+                  isActive: detail.status === "Y",
+                  status: detail.status === "Y" ? "등록완료" : "비활성",
+                  themes: themaRes.data.data.map((t) => t.themaName),
+                };
+              })
+          )
+        );
+      })
+      .then((merged) => {
+        setTravelData(merged);
+      })
+      .catch((err) => console.error("여행지 목록 조회 실패", err));
+  };
+
+  const handleStatusToggle = (no, currentStatus) => {
+    const newStatus = currentStatus === "Y" ? "N" : "Y";
+
+    axios
+      .delete(`${API_URL}/api/admin/travels/${no}`, {
+        headers,
+        data: { status: newStatus },
+      })
+      .then(() => {
+        setTravelData((prev) =>
+          prev.map((item) =>
+            item.no === no
+              ? {
+                  ...item,
+                  isActive: newStatus === "Y",
+                  status: newStatus === "Y" ? "등록완료" : "비활성",
+                }
+              : item
+          )
+        );
+      })
+      .catch((err) => console.error("상태 변경 실패", err));
   };
 
   const handleEdit = (no) => {
-    console.log(`수정: ${no}`);
+    navigate(`/admin/travels/${no}`);
   };
-  const handleSearch = () => {
-    console.log("검색:", { periodFilter, statusFilter, searchTerm });
+
+  const handleSearch = (page = 1) => {
+    setAppliedSearchTerm(searchTerm);
+    setIsSearchMode(true);
+    setCurrentPage(page);
+
+    axios
+      .get(`${API_URL}/api/admin/travels/filter/search`, {
+        params: {
+          page,
+          size: 10,
+          search: searchTerm,
+          status: statusFilter,
+          period: periodFilter,
+          thema: activeThema !== "전체" ? activeThema : null,
+        },
+        headers,
+      })
+      .then((res) => {
+        console.log(res);
+        const { data, total } = res.data.data;
+
+        const validData = data.filter(
+          (travel) => travel !== null && travel.travelNo
+        );
+
+        if (validData.length === 0) {
+          setTravelData([]);
+          setTotalPages(1);
+          return;
+        }
+
+        Promise.all(
+          validData.map((travel) =>
+            axios
+              .all([
+                axios.get(`${API_URL}/api/admin/travels/${travel.travelNo}`, {
+                  headers,
+                }),
+                axios.get(
+                  `${API_URL}/api/admin/travels/${travel.travelNo}/themas`,
+                  { headers }
+                ),
+              ])
+              .then(([detailRes, themaRes]) => {
+                const detail = detailRes.data.data;
+                return {
+                  no: detail.travelNo,
+                  name: detail.title,
+                  registrationDate: detail.createdDate
+                    ?.replace("T", " ")
+                    .substring(0, 16),
+                  modificationDate: detail.modifiedDate
+                    ?.replace("T", " ")
+                    .substring(0, 16),
+                  isActive: detail.status === "Y",
+                  status: detail.status === "Y" ? "등록완료" : "비활성",
+                  themes: themaRes.data.data.map((t) => t.themaName),
+                };
+              })
+          )
+        ).then((merged) => {
+          setTravelData(merged);
+          setTotalPages(Math.ceil(total / 10));
+        });
+      })
+
+      .catch((err) => console.error("검색 실패", err));
   };
 
   // 테마 추가 모달 열기
@@ -94,27 +222,58 @@ export default function TravelAdminManagement() {
 
   // 여행지-테마 추가/삭제
   const handleThemaAdd = (travelId, themaName) => {
-    setTravelData((prev) =>
-      prev.map((item) =>
-        item.no === travelId
-          ? {
-              ...item,
-              themes: item.themes.includes(themaName)
-                ? item.themes
-                : [...item.themes, themaName],
-            }
-          : item
+    const thema = themas.find((t) => t.name === themaName);
+    if (!thema) return;
+
+    axios
+      .post(
+        `${API_URL}/api/admin/travels/thema-bridge`,
+        {
+          travelNo: travelId,
+          themaNo: thema.id,
+        },
+        { headers }
       )
-    );
+      .then(() => {
+        // UI 동기화
+        setTravelData((prev) =>
+          prev.map((item) =>
+            item.no === travelId && !item.themes.includes(themaName)
+              ? { ...item, themes: [...item.themes, themaName] }
+              : item
+          )
+        );
+        setShowThemaModal(false);
+      })
+      .catch((err) => console.error("테마 추가 실패", err));
+    setShowThemaModal(false);
   };
+
   const handleThemaRemove = (travelId, themaName) => {
-    setTravelData((prev) =>
-      prev.map((item) =>
-        item.no === travelId
-          ? { ...item, themes: item.themes.filter((t) => t !== themaName) }
-          : item
-      )
-    );
+    const thema = themas.find((t) => t.name === themaName);
+    if (!thema) return;
+
+    axios
+      .delete(`${API_URL}/api/admin/travels/thema-bridge`, {
+        headers,
+        data: {
+          travelNo: travelId,
+          themaNo: thema.id,
+        },
+      })
+      .then(() => {
+        // UI 동기화
+        setTravelData((prev) =>
+          prev.map((item) =>
+            item.no === travelId
+              ? { ...item, themes: item.themes.filter((t) => t !== themaName) }
+              : item
+          )
+        );
+        setShowThemaModal(false);
+      })
+      .catch((err) => console.error("테마 삭제 실패", err));
+    setShowThemaModal(false);
   };
 
   // 스타일 헬퍼
@@ -124,43 +283,10 @@ export default function TravelAdminManagement() {
       : "bg-red-100 text-red-800";
   const getStatusText = (status) =>
     status === "등록완료" ? "등록완료" : "비활성";
-  const getThemaColor = (name) => {
-    const map = {
-      "자연/경관": "bg-green-100 text-green-800",
-      "문화/역사": "bg-purple-100 text-purple-800",
-      "음식/맛집": "bg-orange-100 text-orange-800",
-      쇼핑: "bg-pink-100 text-pink-800",
-      엔터테인먼트: "bg-blue-100 text-blue-800",
-      체험활동: "bg-yellow-100 text-yellow-800",
-      "휴양/힐링": "bg-teal-100 text-teal-800",
-    };
-    return map[name] || "bg-gray-100 text-gray-800";
+
+  const getThemaColor = () => {
+    return "bg-gray-100 text-gray-800";
   };
-
-  // 필터링
-  const filteredData = travelData.filter((item) => {
-    const matchThema =
-      activeThema === "전체" || item.themes.includes(activeThema);
-    const matchStatus =
-      !statusFilter ||
-      (statusFilter === "active" && item.isActive) ||
-      (statusFilter === "inactive" && !item.isActive);
-    const matchSearch =
-      !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    let matchPeriod = true;
-    if (periodFilter !== "전체") {
-      const today = new Date();
-      const d = new Date(item.registrationDate.replace(/\./g, "-"));
-      if (periodFilter === "오늘")
-        matchPeriod = d.toDateString() === today.toDateString();
-      else if (periodFilter === "최근 7일")
-        matchPeriod = d >= new Date(today.getTime() - 7 * 86400000);
-      else if (periodFilter === "최근 30일")
-        matchPeriod = d >= new Date(today.getTime() - 30 * 86400000);
-    }
-    return matchThema && matchStatus && matchSearch && matchPeriod;
-  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -257,11 +383,24 @@ export default function TravelAdminManagement() {
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
-                    onClick={handleSearch}
+                    onClick={() => handleSearch()}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
                     <Search className="h-4 w-4" />
                   </button>
+                  {isSearchMode && (
+                    <button
+                      onClick={() => {
+                        setIsSearchMode(false);
+                        setSearchTerm("");
+                        setAppliedSearchTerm("");
+                        setCurrentPage(1);
+                      }}
+                      className="text-sm text-blue-600 underline ml-2"
+                    >
+                      검색 초기화
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -297,7 +436,7 @@ export default function TravelAdminManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((item) => (
+              {travelData.map((item) => (
                 <tr key={item.no} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {item.no}
@@ -307,9 +446,9 @@ export default function TravelAdminManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1 max-w-xs">
-                      {item.themes.map((t) => (
+                      {item.themes.map((t, idx) => (
                         <span
-                          key={t}
+                          key={`${item.no}-${t}-${idx}`}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${getThemaColor(
                             t
                           )}`}
@@ -348,7 +487,9 @@ export default function TravelAdminManagement() {
                         수정하기
                       </button>
                       <button
-                        onClick={() => handleStatusToggle(item.no)}
+                        onClick={() =>
+                          handleStatusToggle(item.no, item.isActive ? "Y" : "N")
+                        }
                         className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors text-xs ${
                           item.isActive
                             ? "bg-red-100 text-red-700 hover:bg-red-200"
@@ -388,7 +529,7 @@ export default function TravelAdminManagement() {
         <div className="px-6 py-4 bg-gray-50 border-t">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              총 {filteredData.length}개의 여행지
+              총 {totalPages * 10}개의 여행지 중 {travelData.length}개 표시 중
             </div>
             <div className="flex items-center gap-2">
               <button

@@ -47,7 +47,6 @@ function App() {
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/customer-service" element={<CustomerCenter />} />
             <Route path="/myplan" element={<StepIndicator />} />
-
             {/* 로그인 유저 */}
             <Route path="/signUp" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
@@ -58,7 +57,6 @@ function App() {
             <Route path="/myPage" element={<MyPage />} />
             <Route path="/myPage/changePassword" element={<ChangePassword />} />
             <Route path="/myPage/deleteMember" element={<DeleteMember />} />
-
             {/* 관리자 전용 */}
             <Route path="/adminPage" element={<AdminPage />} />
             <Route path="/adminPage/memberList" element={<MemberList />} />
@@ -79,9 +77,9 @@ function App() {
             />
             <Route path="/travels/detail" element={<TravelDetailPage />} />
             <Route path="/festivals" element={<FestivalPage />} />
-
             {/* 여행지 관련 관리자 기능 */}
             <Route path="/admin/travels" element={<TravelRegister />} />
+            <Route path="/admin/travels/:id" element={<TravelRegister />} />
             <Route path="/admin/festivals" element={<FestivalRegister />} />
             <Route
               path="/admin/travels/management"
@@ -91,7 +89,6 @@ function App() {
               path="/admin/travels/options/management"
               element={<TravelOptionsManagement />}
             />
-
             {/* 나의 여행 플랜 */}
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
