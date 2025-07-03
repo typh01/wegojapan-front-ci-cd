@@ -4,7 +4,6 @@ import {
   Star,
   MapPin,
   Calendar,
-  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,61 +27,60 @@ function SliderSection({ items = [], title }) {
             className="flex transition-transform duration-300 ease-in-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            {items.map((item) => (
-              <div key={item.travelNo} className="w-full flex-shrink-0">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden mx-2 md:flex">
-                  <img
-                    src={item.imageList?.[0]?.imageUrl || "/placeholder.jpg"}
-                    alt={item.title}
-                    className="w-full md:w-1/2 h-64 md:h-80 object-cover"
-                  />
-                  <div className="md:w-1/2 p-6 flex flex-col justify-center">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        운영 중
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-600">
-                          {item.rating || "0.0"}
+            {items.map((item) => {
+              const tags =
+                item.tagListForView?.map((t) => t.tagName) ??
+                item.themaListForView?.map((t) => t.themaName) ??
+                [];
+              const facilities =
+                item.optionListForView?.map((o) => o.optionName) ?? [];
+
+              return (
+                <div key={item.travelNo} className="w-full flex-shrink-0">
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden mx-2 md:flex">
+                    <img
+                      src={item.imageList?.[0]?.imageUrl || "/placeholder.jpg"}
+                      alt={item.title}
+                      className="w-full md:w-1/2 h-64 md:h-80 object-cover"
+                    />
+                    <div className="md:w-1/2 p-6 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          운영 중
                         </span>
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <MapPin className="h-4 w-4" />
-                      <span className="text-sm">{item.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Calendar className="h-4 w-4" />
-                      <span className="text-sm">상시 운영</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {(item.tagListForView || item.themaListForView || []).map(
-                        (tag, index) => (
-                          <span
-                            key={index}
-                            className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-                          >
-                            #{tag.tagName || tag.themaName}
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600">
+                            {item.rating || "0.0"}
                           </span>
-                        )
-                      )}
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-gray-600 mb-2">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">{item.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 mb-2">
+                        <Calendar className="h-4 w-4" />
+                        <span className="text-sm">상시 운영</span>
+                      </div>
+                      <TagList tags={tags} />
+                      <FacilityList facilities={facilities} />
+                      <button
+                        onClick={() =>
+                          navigate(`/travels/detail/${item.travelNo}`)
+                        }
+                        className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        자세히 보기
+                      </button>
                     </div>
-                    <button
-                      onClick={() =>
-                        navigate(`/travels/detail/${item.travelNo}`)
-                      }
-                      className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      자세히 보기
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -98,8 +96,7 @@ function SliderSection({ items = [], title }) {
         >
           <ChevronRight className="h-6 w-6 text-gray-600" />
         </button>
-        <TagList tags={tags} />
-        <FacilityList facilities={facilities} />
+
         <div className="flex justify-center mt-4 gap-2">
           {items.map((_, idx) => (
             <button

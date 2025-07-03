@@ -1,10 +1,14 @@
-import { MapPin, Star, Heart, Share2 } from "lucide-react";
+import { MapPin, Star, Share2 } from "lucide-react";
 import TagList from "./TagList";
 import FacilityList from "./FacilityList";
+import BookMark from "./BookMark"; // 추가
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../../components/Context/AuthContext"; // 실제 AuthContext 경로 확인
 
-function DestinationGrid({ destinations, favorites, toggleFavorite }) {
+function DestinationGrid({ destinations }) {
   const navigate = useNavigate();
+  const { auth } = useContext(AuthContext); // 현재 로그인된 사용자 정보
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -13,7 +17,7 @@ function DestinationGrid({ destinations, favorites, toggleFavorite }) {
         const imageUrl = dest.imageList?.[0]?.imageUrl || "/placeholder.svg";
         const category = dest.categoryName || "기타";
         const location = dest.address || dest.guName || "미정";
-        const rating = dest.rating || "4.5"; // API에 없으면 더미값
+        const rating = dest.rating || "4.5";
         const tags =
           dest.tagListForView?.map((t) => t.tagName || t.themaName) || [];
         const facilities =
@@ -36,16 +40,11 @@ function DestinationGrid({ destinations, favorites, toggleFavorite }) {
                 </span>
               </div>
               <div className="absolute top-3 right-3 flex gap-1">
-                <button
-                  onClick={() => toggleFavorite(id)}
-                  className={`p-1.5 rounded-full transition-colors ${
-                    favorites.has(id)
-                      ? "bg-red-500 text-white"
-                      : "bg-white bg-opacity-80 text-gray-600 hover:bg-opacity-100"
-                  }`}
-                >
-                  <Heart className="h-4 w-4" />
-                </button>
+                <BookMark
+                  travelNo={id}
+                  memberNo={auth?.memberNo}
+                  isBookmarked={dest.isBookmarked}
+                />
                 <button className="p-1.5 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full text-gray-600">
                   <Share2 className="h-4 w-4" />
                 </button>
