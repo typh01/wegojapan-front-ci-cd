@@ -1,51 +1,72 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../../../components/Context/AuthContext";
 
-const BookMark = ({ travelNo, memberNo, isBookmarked }) => {
-  const [bookmarked, setBookmarked] = useState(isBookmarked);
+const BookMark = ({ travelNo, isBookmarked }) => {
   const { auth } = useContext(AuthContext);
-  const isDisabled = !auth?.isAuthenticated;
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
+  const memberNo = auth?.loginInfo?.memberNo;
+  const accessToken = auth?.tokens?.accessToken;
+  const isDisabled = !auth?.isAuthenticated || !memberNo;
+
+  const [bookmarked, setBookmarked] = useState(isBookmarked);
+
+  useEffect(() => {
+    setBookmarked(isBookmarked);
+  }, [isBookmarked]);
+
+  useEffect(() => {}, [travelNo, memberNo]);
 
   const handleAdd = () => {
+    if (!accessToken) {
+      return;
+    }
+
     axios
-      .post(`${apiUrl}/api/bookMark/insert-book`, {
-        travelNo: travelNo,
-        memberNo: memberNo,
-      })
+      .post(
+        `${apiUrl}/api/bookMark/insert-book`,
+        { travelNo, memberNo },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
       .then((response) => {
         console.log(response);
         setBookmarked(true);
-        alert("즐겨찾기 추가됨");
+        alert("즐겨찾기에 추가되었습니다.");
       })
       .catch((error) => {
         console.error(error);
+        alert("즐겨찾기 추가에 실패했습니다.");
       });
   };
 
   const handleDelete = () => {
+    if (!accessToken) {
+      return;
+    }
+
     axios
       .delete(`${apiUrl}/api/bookMark/delete-book`, {
-        travelNo: travelNo,
-        memberNo: memberNo,
+        data: { travelNo, memberNo },
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((response) => {
         console.log(response);
         setBookmarked(false);
-        alert("즐겨찾기 취소됨");
+        alert("즐겨찾기에서 제거되었습니다.");
       })
       .catch((error) => {
         console.error(error);
+        alert("즐겨찾기 삭제에 실패했습니다.");
       });
   };
 
   const handleBookmark = () => {
-    if (bookmarked) {
-      handleDelete();
-    } else {
-      handleAdd();
+    if (isDisabled) {
+      alert("로그인이 필요합니다.");
+      return;
     }
+
+    bookmarked ? handleDelete() : handleAdd();
   };
 
   return (
