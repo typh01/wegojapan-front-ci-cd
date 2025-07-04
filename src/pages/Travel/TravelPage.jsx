@@ -5,7 +5,6 @@ import DestinationGrid from "./common/DestinationGrid";
 import Pagination from "../../components/common/Page/Pagination";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import BookMark from "./common/BookMark";
 
 function TravelPage() {
   const navigate = useNavigate();

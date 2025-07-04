@@ -38,10 +38,6 @@ function DestinationGrid({ destinations }) {
                 </span>
               </div>
               <div className="absolute top-3 right-3 flex gap-1">
-                <BookMark />
-                <button className="p-1.5 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full text-gray-600">
-                  <Share2 className="h-4 w-4" />
-                </button>
                 <span className="inline-block bg-blue-50 text-blue-600 border border-blue-200 text-sm px-3 py-1 rounded-full font-medium">
                   조회수 : {dest.viewCount}
                 </span>

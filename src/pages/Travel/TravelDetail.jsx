@@ -143,12 +143,6 @@ function TravelDetailPage() {
                     <span className="inline-block bg-blue-50 text-blue-600 border border-blue-200 text-sm px-3 py-1 rounded-full font-medium">
                       조회수 : {travelDetail.viewCount}
                     </span>
-                    <button className="p-2 text-gray-600 hover:text-red-500 hover:bg-gray-100 rounded-full transition-colors">
-                      <Heart className="h-4 w-4" />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors">
-                      <Share2 className="h-4 w-4" />
-                    </button>
                   </div>
                 </div>
 
