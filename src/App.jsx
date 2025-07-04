@@ -31,6 +31,7 @@ import MemberList from "./admin/MemberList";
 
 import ReviewReportList from "./admin/ReviewReportList";
 import TravelReportList from "./admin/TravelReportList";
+import BookMarkList from "./components/MyPage/BookMarkList";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
             <Route path="/myPage" element={<MyPage />} />
             <Route path="/myPage/changePassword" element={<ChangePassword />} />
             <Route path="/myPage/deleteMember" element={<DeleteMember />} />
+            <Route path="/myPage/BookMarkList" element={<BookMarkList />} />
             {/* 관리자 전용 */}
             <Route path="/adminPage" element={<AdminPage />} />
             <Route path="/adminPage/memberList" element={<MemberList />} />
