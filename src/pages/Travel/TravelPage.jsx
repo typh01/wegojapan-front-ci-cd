@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import SliderSection from "./common/SliderSection";
 import CategoryFilter from "./common/CategoryFilter";
 import DestinationGrid from "./common/DestinationGrid";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import BookMark from "./common/BookMark";
+import { AuthContext } from "../../components/Context/AuthContext";
 
 function TravelPage() {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchCategories();
-    fetchTravelList();
-  }, []);
-
   const API_URL = window.ENV.API_URL;
+  const { auth } = useContext(AuthContext);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [favorites, setFavorites] = useState(new Set());
@@ -27,12 +24,18 @@ function TravelPage() {
   const [generalList, setGeneralList] = useState([]);
   const [categories, setCategories] = useState([]);
 
+  const memberNo = auth?.loginInfo?.memberNo;
+
+  useEffect(() => {
+    fetchCategories();
+    fetchTravelList();
+  }, []);
+
   const fetchTravelList = () => {
     axios
       .get(`${API_URL}/api/travels`)
       .then((res) => {
         const data = res.data.data;
-        console.log(data);
         setTravelList(data);
         setPopularList(data.slice(0, 5));
         setGeneralList(data.slice(5, 15));
@@ -121,12 +124,20 @@ function TravelPage() {
             />
           </div>
 
-          <DestinationGrid
-            destinations={filteredDestinations}
-            favorites={favorites}
-            toggleFavorite={toggleFavorite}
-            resetFilters={resetFilters}
-          />
+          {auth?.isAuthenticated && memberNo && (
+            <DestinationGrid
+              destinations={filteredDestinations}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+              resetFilters={resetFilters}
+              renderBookmark={(travelNo) => (
+                <BookMark
+                  travelNo={travelNo}
+                  isBookmarked={favorites.has(travelNo)}
+                />
+              )}
+            />
+          )}
 
           {filteredDestinations.length > 0 && (
             <div className="text-center">
