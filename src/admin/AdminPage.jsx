@@ -55,17 +55,11 @@ const AdminPage = () => {
       ],
     },
     {
-      title: "축제",
       buttons: [
         {
           src: "/축제등록.png",
-          text: "축제 등록",
-          path: "/adminPage/festival/register",
-        },
-        {
-          src: "/축제관리.png",
-          text: "축제 관리",
-          path: "/adminPage/festival/manage",
+          text: "여행지 옵션 관리",
+          path: "/admin/travels/options/management",
         },
       ],
     },

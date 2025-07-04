@@ -12,9 +12,7 @@ import Login from "./components/Auth/Login";
 import TravelOptionsManagement from "./pages/Travel/admin/TravelOptionManagement";
 import TravelAdminManagement from "./pages/Travel/admin/TravelAdminManagement";
 import TravelRegister from "./pages/Travel/admin/TravelRegister";
-import FestivalRegister from "./pages/Travel/admin/FestivalRegister";
 import TravelPage from "./pages/Travel/TravelPage";
-import FestivalPage from "./pages/Travel/FestivalPage";
 import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import MyTravelPlanDetail from "./pages/MyPlan/MyTravelPlanDetail";
@@ -77,12 +75,10 @@ function App() {
               path="/travels/search"
               element={<TravelDetailSearchPage />}
             />
-            <Route path="/travels/detail" element={<TravelDetailPage />} />
-            <Route path="/festivals" element={<FestivalPage />} />
+            <Route path="/travels/detail/:id" element={<TravelDetailPage />} />
             {/* 여행지 관련 관리자 기능 */}
             <Route path="/admin/travels" element={<TravelRegister />} />
             <Route path="/admin/travels/:id" element={<TravelRegister />} />
-            <Route path="/admin/festivals" element={<FestivalRegister />} />
             <Route
               path="/admin/travels/management"
               element={<TravelAdminManagement />}

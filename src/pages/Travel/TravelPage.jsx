@@ -1,47 +1,33 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SliderSection from "./common/SliderSection";
 import CategoryFilter from "./common/CategoryFilter";
 import DestinationGrid from "./common/DestinationGrid";
+import Pagination from "../../components/common/Page/Pagination";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import BookMark from "./common/BookMark";
-import { AuthContext } from "../../components/Context/AuthContext";
 
 function TravelPage() {
   const navigate = useNavigate();
   const API_URL = window.ENV.API_URL;
-  const { auth } = useContext(AuthContext);
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [favorites, setFavorites] = useState(new Set());
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedDistrict, setSelectedDistrict] = useState("전체");
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState([]);
   const [travelList, setTravelList] = useState([]);
   const [popularList, setPopularList] = useState([]);
-  const [generalList, setGeneralList] = useState([]);
-  const [categories, setCategories] = useState([]);
 
-  const memberNo = auth?.loginInfo?.memberNo;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchCategories();
     fetchTravelList();
   }, []);
-
-  const fetchTravelList = () => {
-    axios
-      .get(`${API_URL}/api/travels`)
-      .then((res) => {
-        const data = res.data.data;
-        setTravelList(data);
-        setPopularList(data.slice(0, 5));
-        setGeneralList(data.slice(5, 15));
-      })
-      .catch((err) => console.error("여행지 목록 조회 실패:", err));
-  };
 
   const fetchCategories = () => {
     axios
@@ -50,24 +36,27 @@ function TravelPage() {
         const categoryList = res.data.data.map((cat) => ({
           id: cat.categoryNo,
           name: cat.categoryName,
-          status: cat.categoryStatus === "Y" ? "ACTIVE" : "INACTIVE",
-          createdDate: cat.categoryCreatedDate,
-          modifiedDate: cat.categoryModifiedDate,
         }));
-        const fullList = [{ id: 0, name: "전체" }, ...categoryList];
-        setCategories(fullList);
+        setCategories([{ id: 0, name: "전체" }, ...categoryList]);
       })
-      .catch((err) => {
-        console.error("카테고리 목록 조회 실패:", err);
-      });
+      .catch((err) => console.error("카테고리 목록 조회 실패:", err));
   };
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
-    });
+  const fetchTravelList = () => {
+    axios
+      .get(`${API_URL}/api/travels`, {
+        params: {
+          page: 1,
+          size: 17,
+        },
+      })
+      .then((res) => {
+        const { data, total } = res.data.data;
+        setPopularList(data.slice(0, 5));
+        setTravelList(data.slice(5));
+        setTotalPages(Math.ceil(total / itemsPerPage));
+      })
+      .catch((err) => console.error("여행지 목록 조회 실패:", err));
   };
 
   const resetFilters = () => {
@@ -76,9 +65,20 @@ function TravelPage() {
     setSelectedTags([]);
     setSelectedFacilities([]);
     setSearchTerm("");
+    setCurrentPage(1);
   };
 
-  const filteredDestinations = generalList.filter((d) => {
+  useEffect(() => {
+    setCurrentPage(1); // 필터 변경 시 1페이지로 초기화
+  }, [
+    selectedCategory,
+    selectedDistrict,
+    selectedTags,
+    selectedFacilities,
+    searchTerm,
+  ]);
+
+  const filteredDestinations = travelList.filter((d) => {
     const matchesCategory =
       selectedCategory === "전체" || d.categoryName === selectedCategory;
     const matchesDistrict =
@@ -102,6 +102,11 @@ function TravelPage() {
     );
   });
 
+  const pagedDestinations = filteredDestinations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -124,28 +129,18 @@ function TravelPage() {
             />
           </div>
 
-          {auth?.isAuthenticated && memberNo && (
-            <DestinationGrid
-              destinations={filteredDestinations}
-              favorites={favorites}
-              toggleFavorite={toggleFavorite}
-              resetFilters={resetFilters}
-              renderBookmark={(travelNo) => (
-                <BookMark
-                  travelNo={travelNo}
-                  isBookmarked={favorites.has(travelNo)}
-                />
-              )}
-            />
-          )}
+          <DestinationGrid
+            destinations={pagedDestinations}
+            resetFilters={resetFilters}
+          />
 
           {filteredDestinations.length > 0 && (
-            <div className="text-center">
+            <div className="text-center mt-4">
               <button
                 onClick={() => navigate(`/travels/search`)}
                 className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium"
               >
-                더보기
+                상세 검색
               </button>
             </div>
           )}
