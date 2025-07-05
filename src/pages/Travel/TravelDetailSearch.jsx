@@ -417,7 +417,8 @@ export default function TravelDetailSearchPage() {
             </p>
             <button
               onClick={resetFilters}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-8 py-3 rounded-md text-white font-medium transition-all duration-200 cursor-pointer hover:opacity-90 active:scale-95
+    bg-[linear-gradient(100deg,_rgba(115,179,223,0.95)_-49.53%,_rgba(97,160,212,0.95)_24.57%,_rgba(118,217,228,0.95)_129.21%)]"
             >
               전체 여행지 보기
             </button>
