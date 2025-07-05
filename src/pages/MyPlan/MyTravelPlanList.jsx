@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Page/Pagination";
 import { AuthContext } from "../../components/Context/AuthContext";
 import axios from "axios";
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Users,
+  PackageOpen,
+  LogIn,
+  CalendarClock,
+} from "lucide-react";
 
 const API_BASE_URL = window.ENV?.API_URL + "/api";
 
@@ -153,6 +162,7 @@ const MyTravelPlanList = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
+          <LogIn className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-lg">로그인이 필요한 서비스입니다.</p>
           <button
             onClick={() => (window.location.href = "/login")}
@@ -183,9 +193,7 @@ const MyTravelPlanList = () => {
           {/* 검색 입력 필드 */}
           <div className="flex items-center mb-4">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                🔍
-              </span>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 value={searchKeyword}
@@ -218,6 +226,7 @@ const MyTravelPlanList = () => {
         {plans.length === 0 ? (
           // 데이터가 없을 때
           <div className="text-center py-16">
+            <PackageOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <div className="text-gray-500 text-base mb-2">
               {searchKeyword || selectedFilter !== "전체"
                 ? "조건에 맞는 플랜이 없습니다."
@@ -257,19 +266,25 @@ const MyTravelPlanList = () => {
 
                     {/* 플랜 상세 정보 */}
                     <div className="space-y-2 text-sm text-gray-600">
-                      <p>
-                        📍 지역 :{" "}
+                      <p className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        지역 :{" "}
                         {plan.selectedRegion || plan.selectRegion || "미지정"}
                       </p>
-                      <p>
-                        📅 기간 : {formatDate(plan.travelStartDate)} ~{" "}
+                      <p className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        기간 : {formatDate(plan.travelStartDate)} ~{" "}
                         {formatDate(plan.travelEndDate)}
                       </p>
-                      <p>👥 인원 : {plan.groupSize}명</p>
+                      <p className="flex items-center">
+                        <Users className="w-4 h-4 mr-2" />
+                        인원 : {plan.groupSize}명
+                      </p>
                     </div>
 
                     {/* 작성일 정보 */}
-                    <div className="mt-3 text-xs text-gray-400">
+                    <div className="flex items-center mt-3 text-xs text-gray-400">
+                      <CalendarClock className="w-3 h-3 mr-1.5" />
                       작성일: {formatDate(plan.createDate)}
                     </div>
                   </div>
