@@ -7,12 +7,12 @@ const Header = () => {
   const navi = useNavigate();
   const { auth, logout } = useContext(AuthContext);
 
-  // 로그인 상태 확인 함수
+  // 로그인 페이지로 이동하는 함수
   const handleLogin = () => {
     navi("/login");
   };
 
-  // 로그아웃 상태 확인 함수
+  // 로그아웃 처리 함수
   const handleLogout = () => {
     logout();
   };
@@ -49,38 +49,44 @@ const Header = () => {
 
   return (
     <div className="w-full bg-white">
+      {/* 상단 헤더 영역 */}
       <div className="flex justify-between items-center px-8 py-3">
+        {/* 로고 영역 */}
         <div className="flex items-center">
-          <img src={WeGoJapanLogo} className="h-12 object-contain" />
+          <img
+            src={WeGoJapanLogo}
+            className="h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            onClick={goToHome}
+          />
         </div>
 
-        {/* 로그인 상태에 따라 다르게 표시 */}
+        {/* 로그인 상태에 따라 다르게 표시되는 버튼들 */}
         <div className="flex items-center space-x-6">
           {auth.isAuthenticated ? ( // 로그인된 상태라면
             <>
-              {/*관리자 여부 판단 */}
+              {/* 관리자 여부 판단 */}
               {auth.loginInfo?.authorities?.some(
                 (auth) => auth.authority === "ROLE_ADMIN"
               ) ? (
                 <button
                   onClick={() => navi("/adminPage")}
-                  className="text-blue-600 font-semibold hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                  className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
                 >
                   관리자 페이지
                 </button>
               ) : (
                 <button
                   onClick={goToMyInfo}
-                  className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
                 >
                   나의 정보
                 </button>
               )}
 
-              {/* 로그아웃 */}
+              {/* 로그아웃 버튼 */}
               <button
                 onClick={handleLogout}
-                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
               >
                 로그아웃
               </button>
@@ -88,18 +94,18 @@ const Header = () => {
           ) : (
             // 로그인되지 않은 상태라면
             <>
-              {/* 로그인 */}
+              {/* 로그인 버튼 */}
               <button
                 onClick={handleLogin}
-                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
               >
                 로그인
               </button>
 
-              {/* 회원가입 */}
+              {/* 회원가입 버튼 */}
               <button
                 onClick={goToSignup}
-                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-sky-500 hover:to-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
               >
                 회원가입
               </button>
@@ -108,7 +114,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* 네비게이션 영역 */}
+      {/* 네비게이션 메뉴 영역 */}
       <div
         className="w-full"
         style={{
@@ -117,37 +123,41 @@ const Header = () => {
         }}
       >
         <div className="flex">
+          {/* HOME 메뉴 */}
           <div className="flex-1 text-center py-3 px-4">
             <button
               onClick={goToHome}
-              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+              className="text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
             >
               HOME
             </button>
           </div>
 
+          {/* 축제 메뉴 */}
           <div className="flex-1 text-center py-3 px-4">
             <button
               onClick={goToFestivals}
-              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+              className="text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
             >
               축제
             </button>
           </div>
 
+          {/* 여행지 메뉴 */}
           <div className="flex-1 text-center py-3 px-4">
             <button
               onClick={goToTravels}
-              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+              className="text-white font-medium hover:bg-cyan-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
             >
               여행지
             </button>
           </div>
 
+          {/* 나의 플랜 세우기 메뉴 */}
           <div className="flex-1 text-center py-3 px-4">
             <button
               onClick={goToMyPlan}
-              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+              className="text-white font-medium hover:bg-sky-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
             >
               나의 플랜 세우기
             </button>
@@ -157,4 +167,5 @@ const Header = () => {
     </div>
   );
 };
+
 export default Header;
