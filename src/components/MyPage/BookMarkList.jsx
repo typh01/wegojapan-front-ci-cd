@@ -39,7 +39,7 @@ const BookMarkList = () => {
       <DestinationGrid
         destinations={bookmarkedTravels}
         renderBookmark={(travelNo) => (
-          <BookMark travelNo={travelNo} isBookmarked={true} />
+          <BookMark travelNo={travelNo.travelNo} isBookmarked={false} />
         )}
       />
     </div>

@@ -1,8 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../components/Context/AuthContext";
+import Pagination from "../components/common/Page/Pagination";
 const ReviewReportList = () => {
   const [reportList, setReportList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
   const { auth } = useContext(AuthContext);
 
@@ -22,6 +25,7 @@ const ReviewReportList = () => {
       })
       .then((response) => {
         setReportList(response.data.data);
+        setTotalPages(response.data.totalPages || 1);
         console.log(response.data.data);
       })
       .catch((error) => {
@@ -72,6 +76,12 @@ const ReviewReportList = () => {
           ))}
         </tbody>
       </table>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        className="mt-6"
+      />
     </div>
   );
 };

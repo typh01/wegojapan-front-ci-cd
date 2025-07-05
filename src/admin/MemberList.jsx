@@ -3,10 +3,13 @@ import StepButton from "../components/common/MyPlan/StepButton";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../components/Context/AuthContext";
+import Pagination from "../components/common/Page/Pagination";
 
 const MemberList = () => {
   const [memberList, setMemberList] = useState([]);
   const [roles, setRoles] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
@@ -28,6 +31,7 @@ const MemberList = () => {
       })
       .then((response) => {
         setMemberList(response.data.data);
+        setTotalPages(response.data.totalPages || 1);
       })
       .catch((error) => {
         console.error("회원 조회 실패:", error);
@@ -118,7 +122,12 @@ const MemberList = () => {
           ))}
         </tbody>
       </table>
-
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        className="mt-6"
+      />
       {/* 저장 / 취소 버튼 */}
       <div className="flex gap-4 justify-center mt-6">
         <StepButton type="prev" onClick={handleCancel}>
