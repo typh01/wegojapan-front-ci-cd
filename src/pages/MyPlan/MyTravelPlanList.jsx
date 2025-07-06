@@ -94,7 +94,7 @@ const MyTravelPlanList = () => {
     [getAuthToken, logout]
   );
 
-  // 필터나 검색어가 변경되면 1페이지로 리셋
+  // 필터나 검색어가 변경되면 1페이지로
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedFilter, searchKeyword]);

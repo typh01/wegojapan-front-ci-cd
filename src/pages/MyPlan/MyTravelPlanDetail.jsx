@@ -61,18 +61,6 @@ const MyTravelPlanDetail = () => {
     return null;
   }, [auth?.isAuthenticated, auth?.tokens]);
 
-  // // 여행지 제목들로 설명 자동 생성 함수
-  // const createTravelDescriptionFromPlaces = (places) => {
-  //   const travelTitles = places
-  //     .map((place) => place.name || place.travelName) // 여행지 이름 추출
-  //     .filter((name) => name) // 빈 이름 제거
-  //     .join(", "); // 쉼표로 연결
-
-  //   return travelTitles
-  //     ? `선택된 여행지: ${travelTitles}` // 여행지가 있으면 포함하여 설명 생성
-  //     : "선택된 여행지가 없습니다."; // 여행지가 없으면 기본 메시지
-  // };
-
   // 구글 맵 초기화
   const setupGoogleMap = useCallback(() => {
     const apiKey = window.ENV?.GOOGLE_MAPS_API_KEY;
