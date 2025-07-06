@@ -1,14 +1,12 @@
-import { MapPin, Star, Share2 } from "lucide-react";
+import { MapPin, Star, Heart, Share2 } from "lucide-react";
 import TagList from "./TagList";
 import FacilityList from "./FacilityList";
-import BookMark from "./BookMark"; // 추가
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../components/Context/AuthContext"; // 실제 AuthContext 경로 확인
+import BookMark from "./BookMark";
+import { AuthContext } from "../../../components/Context/AuthContext";
 
 function DestinationGrid({ destinations }) {
   const navigate = useNavigate();
-  const { auth } = useContext(AuthContext); // 현재 로그인된 사용자 정보
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -35,19 +33,14 @@ function DestinationGrid({ destinations }) {
                 className="w-full h-48 object-cover"
               />
               <div className="absolute top-3 left-3">
-                <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                <span className="bg-blue-400 text-white text-xs px-2 py-1 rounded">
                   {category}
                 </span>
               </div>
               <div className="absolute top-3 right-3 flex gap-1">
-                <BookMark
-                  travelNo={id}
-                  memberNo={auth?.memberNo}
-                  isBookmarked={dest.isBookmarked}
-                />
-                <button className="p-1.5 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full text-gray-600">
-                  <Share2 className="h-4 w-4" />
-                </button>
+                <span className="inline-block bg-blue-50 text-blue-400 border border-blue-200 text-sm px-3 py-1 rounded-full font-medium">
+                  조회수 : {dest.viewCount}
+                </span>
               </div>
             </div>
             <div className="p-4">
@@ -64,7 +57,7 @@ function DestinationGrid({ destinations }) {
               <FacilityList facilities={facilities} />
               <button
                 onClick={() => navigate(`/travels/detail/${id}`)}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="w-full bg-gradient-to-r from-[#73b3df] via-[#61a0d4] to-[#76d9e4] text-white py-2 rounded-md hover:opacity-90 active:scale-95 transition-all text-sm font-medium"
               >
                 상세보기
               </button>
