@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Heart,
@@ -8,55 +8,76 @@ import {
   Clock,
   Globe,
   Star,
+  Info,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import GoogleMap from "./common/GoogleMap";
 
 function TravelDetailPage() {
   const { id } = useParams();
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [travelDetail, setTravelDetail] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
+  const [operatingHoursList, setOperatingHoursList] = useState([]);
+  const navigate = useNavigate();
 
-  // 여행지 상세 데이터
-  const travelDetail = {
-    id: 1,
-    title: "경복궁",
-    category: "관광지",
-    location: "서울특별시 종로구 사직로 161",
-    district: "종로구",
-    phone: "02-3700-3900",
-    website: "https://www.royalpalace.go.kr",
-    operatingHours: "09:00 ~ 18:00",
-    operatingStatus: "운영중",
-    rating: 4.5,
-    reviews: 1234,
-    price: "성인 3,000원",
-    description: `조선왕조의 법궁인 경복궁은 1395년 태조 이성계에 의해 창건되었습니다. 
-    궁궐 건축의 백미로 꼽히는 경복궁은 정문인 광화문을 비롯해 근정전, 경회루, 향원정 등 
-    아름다운 건축물들이 조화롭게 배치되어 있습니다. 특히 수문장 교대식과 궁중문화축전 등 
-    다양한 문화행사가 열려 조선시대 궁중문화를 생생하게 체험할 수 있습니다.`,
-    images: [
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-      "/placeholder.svg?height=400&width=600",
-    ],
-    tags: ["역사", "궁궐", "전통", "문화재", "관광명소"],
-    facilities: ["주차가능", "장애인편의", "화장실", "매점"],
-  };
+  useEffect(() => {
+    if (!id) return;
+    axios
+      .get(`${apiUrl}/api/travels/${id}`)
+      .then((res) => {
+        const data = res.data.data;
+        console.log(data);
 
-  const toggleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
+        setTravelDetail({
+          title: data.title,
+          category: data.categoryName,
+          location: data.address,
+          district: data.guName,
+          phone: data.tel || "정보 없음",
+          website: data.website || "#",
+          operatingStatus: data.status === "Y" ? "운영중" : "운영종료",
+          rating: 4.5,
+          reviews: 0,
+          price: "-",
+          description: data.description,
+          images: data.imageList.map((img) => img.imageUrl),
+          tags:
+            data.tagListForView?.map((t) => t.tagName.replace("#", "")) || [],
+          facilities: data.optionListForView?.map((o) => o.optionName) || [],
+          mapX: data.mapX,
+          mapY: data.mapY,
+          viewCount: data.viewCount,
+        });
+
+        setOperatingHoursList(
+          data.timeList?.map((t) => ({
+            day: t.dayOfWeek,
+            time: `${t.startTime} ~ ${t.endTime}`,
+          })) || []
+        );
+      })
+      .catch((err) => {
+        console.error("여행지 상세 조회 실패", err);
+      });
+  }, [id]);
+
+  if (!travelDetail) return <div className="text-center p-10">로딩 중...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* 뒤로가기 버튼 */}
         <div className="mb-6">
-          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-            <span>목록으로</span>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors px-4 py-2 rounded-md hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            뒤로 가기
           </button>
         </div>
 
@@ -66,233 +87,304 @@ function TravelDetailPage() {
         </div>
 
         {/* 메인 콘텐츠 */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
-            {/* 왼쪽: 이미지 영역 */}
-            <div className="space-y-4">
-              {/* 메인 이미지 */}
-              <div className="aspect-[4/3] bg-gray-200 rounded-lg overflow-hidden">
-                <img
-                  src={
-                    travelDetail.images[selectedImageIndex] ||
-                    "/placeholder.svg"
-                  }
-                  alt={`${travelDetail.title} 이미지 ${selectedImageIndex + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* 썸네일 이미지들 */}
-              <div className="grid grid-cols-4 gap-2">
-                {travelDetail.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square bg-gray-200 rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImageIndex === index
-                        ? "border-blue-500"
-                        : "border-transparent hover:border-gray-300"
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* 왼쪽: 이미지 영역 */}
+              <div className="space-y-4">
+                {/* 메인 이미지 */}
+                <div className="aspect-[4/3] bg-gray-200 rounded-lg overflow-hidden">
+                  <img
+                    src={
+                      travelDetail.images[selectedImageIndex] ||
+                      "/placeholder.svg"
+                    }
+                    alt={`${travelDetail.title} 이미지 ${
+                      selectedImageIndex + 1
                     }`}
-                  >
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`썸네일 ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 오른쪽: 정보 영역 */}
-            <div className="space-y-6">
-              {/* 제목과 액션 버튼 */}
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    {travelDetail.title}
-                  </h2>
-                  <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                    {travelDetail.category}
-                  </span>
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={toggleBookmark}
-                    className={`p-2 rounded-full transition-colors ${
-                      isBookmarked
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    <Heart className="h-5 w-5" />
-                  </button>
-                  <button className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">
-                    <Share2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* 평점과 리뷰 */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="text-lg font-semibold">
-                    {travelDetail.rating}
-                  </span>
-                </div>
-                <span className="text-gray-600">
-                  리뷰 {travelDetail.reviews}개
-                </span>
-                <span className="text-lg font-semibold text-blue-600">
-                  {travelDetail.price}
-                </span>
-              </div>
-
-              {/* 태그 */}
-              <div className="flex flex-wrap gap-2">
-                {travelDetail.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* 편의시설 */}
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-2">편의시설</h3>
-                <div className="flex flex-wrap gap-2">
-                  {travelDetail.facilities.map((facility, index) => (
-                    <span
+                {/* 썸네일 이미지들 */}
+                <div className="grid grid-cols-4 gap-2">
+                  {travelDetail.images.map((image, index) => (
+                    <button
                       key={index}
-                      className="bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-lg"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`aspect-square bg-gray-200 rounded-lg overflow-hidden border-2 transition-colors ${
+                        selectedImageIndex === index
+                          ? "border-blue-500"
+                          : "border-transparent hover:border-gray-300"
+                      }`}
                     >
-                      {facility}
-                    </span>
+                      <img
+                        src={image || "/placeholder.svg"}
+                        alt={`썸네일 ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* 상세 설명 */}
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-2">
-                  여행지 상세 정보
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {travelDetail.description}
-                </p>
+              {/* 오른쪽: 정보 영역 */}
+              <div className="space-y-6">
+                {/* 제목과 액션 버튼 */}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      {travelDetail.title}
+                    </h2>
+                    <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium">
+                      {travelDetail.category}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="inline-block bg-blue-50 text-blue-600 border border-blue-200 text-sm px-3 py-1 rounded-full font-medium">
+                      조회수 : {travelDetail.viewCount}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 평점과 리뷰 */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <span className="text-lg font-semibold">
+                      {travelDetail.rating}
+                    </span>
+                  </div>
+                  <span className="text-gray-600">
+                    리뷰 {travelDetail.reviews.toLocaleString()}개
+                  </span>
+                </div>
+
+                {/* 태그 */}
+                <div className="flex flex-wrap gap-2">
+                  {travelDetail.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full font-medium"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* 편의시설 */}
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-3">편의시설</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {travelDetail.facilities.map((facility, index) => (
+                      <span
+                        key={index}
+                        className="bg-blue-50 text-blue-600 border border-blue-200 text-sm px-3 py-1 rounded-lg font-medium"
+                      >
+                        {facility}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 상세 설명 */}
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    여행지 상세 정보
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {travelDetail.description}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* 지도 영역 */}
-        <div className="bg-white rounded-lg shadow-sm border mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
               위치 정보
             </h3>
-            <div className="aspect-[16/9] bg-gray-200 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-2" />
-                <p>GoogleMap API</p>
-                <p className="text-sm">지도가 여기에 표시됩니다</p>
+
+            {isNaN(travelDetail.mapX) || isNaN(travelDetail.mapY) ? (
+              <div className="aspect-[16/9] bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-2" />
+                  <p className="font-medium">위치 정보 없음</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="rounded-lg overflow-hidden">
+                <GoogleMap
+                  lat={parseFloat(travelDetail.mapY)}
+                  lng={parseFloat(travelDetail.mapX)}
+                  title={travelDetail.title}
+                />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 상세 정보 테이블 */}
-        <div className="bg-white rounded-lg shadow-sm border mb-8">
+        {/* 개선된 상세 정보 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+              <Info className="h-5 w-5" />
               상세 정보
             </h3>
 
-            {/* 기본 정보 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <span className="text-sm text-gray-500">주소</span>
-                    <p className="font-medium">{travelDetail.location}</p>
+            <div className="space-y-6">
+              {/* 기본 정보 그리드 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                {/* 왼쪽 (주소, 전화번호) */}
+                <div className="flex flex-col gap-4 h-full">
+                  <div className="flex-1 flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <MapPin className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">주소</h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {travelDetail.location}
+                      </p>
+                      <span className="inline-block mt-2 bg-white border border-gray-200 text-gray-700 text-xs px-2 py-1 rounded-md">
+                        {travelDetail.district}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <Phone className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        전화번호
+                      </h4>
+                      <a
+                        href={`tel:${travelDetail.phone}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors hover:underline"
+                      >
+                        {travelDetail.phone}
+                      </a>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <span className="text-sm text-gray-500">전화번호</span>
-                    <p className="font-medium">{travelDetail.phone}</p>
+
+                {/* 오른쪽 (웹사이트, 운영상태) */}
+                <div className="flex flex-col gap-4 h-full">
+                  <div className="flex-1 flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <Globe className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        웹사이트
+                      </h4>
+                      {travelDetail.website && travelDetail.website !== "#" ? (
+                        <a
+                          href={travelDetail.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors hover:underline"
+                        >
+                          공식 홈페이지 방문
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-500 text-sm">
+                          웹사이트 정보 없음
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="mt-0.5 flex-shrink-0">
+                      {travelDetail.operatingStatus === "운영중" ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        운영 상태
+                      </h4>
+                      <span
+                        className={`inline-block text-sm px-3 py-1 rounded-full font-medium ${
+                          travelDetail.operatingStatus === "운영중"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {travelDetail.operatingStatus}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <span className="text-sm text-gray-500">영업시간</span>
-                    <p className="font-medium">{travelDetail.operatingHours}</p>
+
+              {/* 구분선 */}
+              <hr className="border-gray-200" />
+
+              {/* 영업시간 */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                  영업시간
+                </h4>
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                    {operatingHoursList.map((item, index) => (
+                      <div key={index} className="text-center">
+                        <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                          <div className="font-medium text-gray-900 mb-1 text-sm">
+                            {item.day}
+                          </div>
+                          <div className="text-xs text-gray-600 leading-tight">
+                            {item.time}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <span className="text-sm text-gray-500">웹사이트</span>
-                    <a
-                      href={travelDetail.website}
-                      className="font-medium text-blue-600 hover:underline"
+              </div>
+
+              {/* 구분선 */}
+              <hr className="border-gray-200" />
+
+              {/* 태그 정보 */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">태그</h4>
+                <div className="flex flex-wrap gap-2">
+                  {travelDetail.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 text-sm px-3 py-1 rounded-full font-medium"
                     >
-                      공식 홈페이지
-                    </a>
-                  </div>
+                      #{tag}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* 운영 상태 */}
-            <div className="mb-6 pb-6 border-b">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">운영 상태:</span>
-                <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">
-                  {travelDetail.operatingStatus}
-                </span>
-              </div>
-            </div>
+              {/* 구분선 */}
+              <hr className="border-gray-200" />
 
-            {/* 태그 정보 */}
-            <div className="mb-6 pb-6 border-b">
-              <h4 className="font-semibold text-gray-800 mb-3">태그</h4>
-              <div className="flex flex-wrap gap-2">
-                {travelDetail.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* 편의시설 정보 */}
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-3">편의시설</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {travelDetail.facilities.map((facility, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg"
-                  >
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-700 text-sm font-medium">
-                      {facility}
-                    </span>
-                  </div>
-                ))}
+              {/* 편의시설 정보 */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-4">편의시설</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {travelDetail.facilities.map((facility, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100"
+                    >
+                      <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                      <span className="text-green-800 text-sm font-medium">
+                        {facility}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -300,7 +392,11 @@ function TravelDetailPage() {
 
         {/* 목록으로 버튼 */}
         <div className="text-center">
-          <button className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+          <button
+            onClick={() => navigate("/travels")}
+            className="px-8 py-3 rounded-md text-white font-medium transition-all duration-200 cursor-pointer hover:opacity-90 active:scale-95
+    bg-[linear-gradient(100deg,_rgba(115,179,223,0.95)_-49.53%,_rgba(97,160,212,0.95)_24.57%,_rgba(118,217,228,0.95)_129.21%)]"
+          >
             목록으로
           </button>
         </div>
@@ -308,5 +404,4 @@ function TravelDetailPage() {
     </div>
   );
 }
-
 export default TravelDetailPage;

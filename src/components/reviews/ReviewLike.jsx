@@ -2,85 +2,79 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../../../components/Context/AuthContext";
 
-const BookMark = ({ travelNo, isBookmarked }) => {
+const ReviewLike = ({ reviewNo, isLiked }) => {
   const { auth } = useContext(AuthContext);
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
   const memberNo = auth?.loginInfo?.memberNo;
   const accessToken = auth?.tokens?.accessToken;
   const isDisabled = !auth?.isAuthenticated || !memberNo;
 
-  const [bookmarked, setBookmarked] = useState(isBookmarked);
+  const [liked, setLiked] = useState(isLiked);
 
   useEffect(() => {
-    setBookmarked(isBookmarked);
-  }, [isBookmarked]);
+    setLiked(isLiked);
+  }, [isLiked]);
 
-  useEffect(() => {}, [travelNo, memberNo]);
-
-  const handleAdd = () => {
-    if (!accessToken) {
-      return;
-    }
+  const handleAddLike = () => {
+    if (!accessToken) return;
 
     axios
       .post(
-        `${apiUrl}/api/bookMark/insert-book`,
-        { travelNo, memberNo },
+        `${apiUrl}/api/reviewLike/insert-like`,
+        { reviewNo, memberNo },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
       .then((response) => {
         console.log(response);
-        setBookmarked(true);
-        alert("즐겨찾기에 추가되었습니다.");
+        setLiked(true);
+        alert("좋아요를 눌렀습니다.");
       })
       .catch((error) => {
         console.error(error);
-        alert("즐겨찾기 추가에 실패했습니다.");
+        alert("좋아요 추가에 실패했습니다.");
       });
   };
 
-  const handleDelete = () => {
-    if (!accessToken) {
-      return;
-    }
+  const handleDeleteLike = () => {
+    if (!accessToken) return;
 
     axios
-      .delete(`${apiUrl}/api/bookMark/delete-book`, {
-        data: { travelNo, memberNo },
+      .delete(`${apiUrl}/api/reviewLike/delete-like`, {
+        data: { reviewNo, memberNo },
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((response) => {
         console.log(response);
-        setBookmarked(false);
-        alert("즐겨찾기에서 제거되었습니다.");
+        setLiked(false);
+        alert("좋아요를 취소했습니다.");
       })
       .catch((error) => {
         console.error(error);
-        alert("즐겨찾기 삭제에 실패했습니다.");
+        alert("좋아요 취소에 실패했습니다.");
       });
   };
 
-  const handleBookmark = () => {
+  const handleLikeToggle = () => {
     if (isDisabled) {
       alert("로그인이 필요합니다.");
       return;
     }
 
-    bookmarked ? handleDelete() : handleAdd();
+    liked ? handleDeleteLike() : handleAddLike();
   };
 
   return (
     <button
-      onClick={handleBookmark}
+      onClick={handleLikeToggle}
       disabled={isDisabled}
       className={`text-2xl hover:scale-110 transition ${
-        bookmarked ? "text-red-500" : "text-gray-300"
+        liked ? "text-blue-500" : "text-gray-300"
       }`}
-      title={bookmarked ? "즐겨찾기 취소" : "즐겨찾기 추가"}
+      title={liked ? "좋아요 취소" : "좋아요 추가"}
     >
-      🔖
+      👍
     </button>
   );
 };
 
-export default BookMark;
+export default ReviewLike;

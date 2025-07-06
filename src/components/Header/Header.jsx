@@ -9,9 +9,50 @@ const Header = () => {
   const { auth, logout } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
 
+
   const goTo = (path) => {
     navi(path);
     setMenuOpen(false);
+
+  // 로그인 상태 확인 함수
+  const handleLogin = () => {
+    navi("/login");
+  };
+
+  // 로그아웃 상태 확인 함수
+  const handleLogout = () => {
+    logout();
+  };
+
+  // 홈 페이지로 이동하는 함수
+  const goToHome = () => {
+    navi("/");
+  };
+
+  // 축제 페이지로 이동하는 함수
+  const goToFestivals = () => {
+    navi("/thema/travels");
+  };
+
+  // 여행지 페이지로 이동하는 함수
+  const goToTravels = () => {
+    navi("/travels");
+  };
+
+  // 나의 플랜 페이지로 이동하는 함수
+  const goToMyPlan = () => {
+    navi("/myplan");
+  };
+
+  // 내정보 페이지로 이동하는 함수
+  const goToMyInfo = () => {
+    navi("/myPage");
+  };
+
+  // 회원가입 페이지로 이동하는 함수
+  const goToSignup = () => {
+    navi("/signup");
+
   };
 
   return (
@@ -87,6 +128,7 @@ const Header = () => {
             "linear-gradient(90deg, #87CEEB 0%, #4682B4 25%, #5F9EA0 50%, #20B2AA 75%, #48D1CC 100%)",
         }}
       >
+
         {["/", "/festivals", "/travels", "/myplan"].map((path, i) => (
           <button
             key={path}
@@ -97,6 +139,35 @@ const Header = () => {
           </button>
         ))}
       </div>
+
+        <div className="flex">
+          <div className="flex-1 text-center py-3 px-4">
+            <button
+              onClick={goToHome}
+              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+            >
+              HOME
+            </button>
+          </div>
+
+          <div className="flex-1 text-center py-3 px-4">
+            <button
+              onClick={goToFestivals}
+              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+            >
+              테마
+            </button>
+          </div>
+
+          <div className="flex-1 text-center py-3 px-4">
+            <button
+              onClick={goToTravels}
+              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
+            >
+              여행지
+            </button>
+          </div>
+
 
       {/* 모바일 메뉴 열렸을 때 */}
       {menuOpen && (
