@@ -30,13 +30,14 @@ import MemberList from "./admin/MemberList";
 
 import ReviewReportList from "./admin/ReviewReportList";
 import TravelReportList from "./admin/TravelReportList";
+import BookMarkList from "./components/MyPage/BookMarkList";
 
 function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="max-w-[1440px] mx-auto px-6 pt-[140px] pb-[145px]">
+        <main className="max-w-[1440px] mx-auto px-6 py-8 pb-[145px]">
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route
@@ -56,6 +57,7 @@ function App() {
             <Route path="/myPage" element={<MyPage />} />
             <Route path="/myPage/changePassword" element={<ChangePassword />} />
             <Route path="/myPage/deleteMember" element={<DeleteMember />} />
+            <Route path="/myPage/BookMarkList" element={<BookMarkList />} />
             {/* 관리자 전용 */}
             <Route path="/adminPage" element={<AdminPage />} />
             <Route path="/adminPage/memberList" element={<MemberList />} />
@@ -90,10 +92,7 @@ function App() {
             {/* 나의 여행 플랜 */}
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
-            <Route
-              path="/myplan/detail/:planNo"
-              element={<MyTravelPlanDetail />}
-            />
+            <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
           </Routes>
         </main>
         <Footer />
