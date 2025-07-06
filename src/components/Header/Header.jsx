@@ -24,7 +24,7 @@ const Header = () => {
 
   // 축제 페이지로 이동하는 함수
   const goToFestivals = () => {
-    navi("/festivals");
+    navi("/thema/travels");
   };
 
   // 여행지 페이지로 이동하는 함수
@@ -139,7 +139,7 @@ const Header = () => {
               onClick={goToFestivals}
               className="text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
             >
-              축제
+              테마
             </button>
           </div>
 
