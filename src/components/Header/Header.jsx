@@ -1,18 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import WeGoJapanLogo from "../../assets/icons/WeGoJapan_Logo.png";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
-import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const navi = useNavigate();
   const { auth, logout } = useContext(AuthContext);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-
-  const goTo = (path) => {
-    navi(path);
-    setMenuOpen(false);
 
   // 로그인 상태 확인 함수
   const handleLogin = () => {
@@ -52,94 +45,77 @@ const Header = () => {
   // 회원가입 페이지로 이동하는 함수
   const goToSignup = () => {
     navi("/signup");
-
   };
 
   return (
-    <div className="w-full fixed top-0 z-50 bg-white shadow-md">
-      <div className="flex justify-between items-center px-4 md:px-8 py-4">
+    <div className="w-full bg-white">
+      <div className="flex justify-between items-center px-8 py-3">
         <div className="flex items-center">
-          <img
-            src={WeGoJapanLogo}
-            className="h-14 object-contain cursor-pointer"
-            onClick={() => goTo("/")}
-          />
+          <img src={WeGoJapanLogo} className="h-12 object-contain" />
         </div>
 
-        {/* PC용 로그인/회원가입 영역 */}
-        <div className="hidden md:flex gap-4">
-          {auth.isAuthenticated ? (
+        {/* 로그인 상태에 따라 다르게 표시 */}
+        <div className="flex items-center space-x-6">
+          {auth.isAuthenticated ? ( // 로그인된 상태라면
             <>
+              {/*관리자 여부 판단 */}
               {auth.loginInfo?.authorities?.some(
-                (a) => a.authority === "ROLE_ADMIN"
+                (auth) => auth.authority === "ROLE_ADMIN"
               ) ? (
                 <button
-                  onClick={() => goTo("/adminPage")}
-                  className="text-blue-600 font-semibold text-sm hover:text-sky-600"
+                  onClick={() => navi("/adminPage")}
+                  className="text-blue-600 font-semibold hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
                 >
                   관리자 페이지
                 </button>
               ) : (
                 <button
-                  onClick={() => goTo("/myPage")}
-                  className="text-gray-700 text-sm hover:text-sky-600"
+                  onClick={goToMyInfo}
+                  className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
                 >
                   나의 정보
                 </button>
               )}
+
+              {/* 로그아웃 */}
               <button
-                onClick={logout}
-                className="text-gray-700 text-sm hover:text-sky-600"
+                onClick={handleLogout}
+                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
               >
                 로그아웃
               </button>
             </>
           ) : (
+            // 로그인되지 않은 상태라면
             <>
+              {/* 로그인 */}
               <button
-                onClick={() => goTo("/login")}
-                className="text-gray-700 text-sm hover:text-sky-600"
+                onClick={handleLogin}
+                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
               >
                 로그인
               </button>
+
+              {/* 회원가입 */}
               <button
-                onClick={() => goTo("/signup")}
-                className="text-gray-700 text-sm hover:text-sky-600"
+                onClick={goToSignup}
+                className="text-gray-700 hover:text-sky-600 transition-colors duration-200 text-sm cursor-pointer"
               >
                 회원가입
               </button>
             </>
           )}
         </div>
-
-        {/* 모바일 햄버거 아이콘 */}
-        <div className="md:hidden">
-          <button onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        </div>
       </div>
 
-      {/* 네비게이션 메뉴 (PC 전용) */}
+      {/* 네비게이션 영역 */}
       <div
-        className="hidden md:flex"
+        className="w-full"
         style={{
           background:
             "linear-gradient(90deg, #87CEEB 0%, #4682B4 25%, #5F9EA0 50%, #20B2AA 75%, #48D1CC 100%)",
         }}
       >
-
-        {["/", "/festivals", "/travels", "/myplan"].map((path, i) => (
-          <button
-            key={path}
-            onClick={() => goTo(path)}
-            className="flex-1 text-white text-center py-3 text-sm hover:text-opacity-80"
-          >
-            {["HOME", "축제", "여행지", "나의 플랜 세우기"][i]}
-          </button>
-        ))}
-      </div>
-
         <div className="flex">
           <div className="flex-1 text-center py-3 px-4">
             <button
@@ -168,25 +144,17 @@ const Header = () => {
             </button>
           </div>
 
-
-      {/* 모바일 메뉴 열렸을 때 */}
-      {menuOpen && (
-        <div className="md:hidden bg-white border-t">
-          {["HOME", "축제", "여행지", "나의 플랜 세우기"].map((label, i) => (
+          <div className="flex-1 text-center py-3 px-4">
             <button
-              key={label}
-              onClick={() =>
-                goTo(["/", "/festivals", "/travels", "/myplan"][i])
-              }
-              className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"
+              onClick={goToMyPlan}
+              className="text-white font-medium hover:text-opacity-80 transition-colors duration-200 block w-full"
             >
-              {label}
+              나의 플랜 세우기
             </button>
-          ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
-
 export default Header;
