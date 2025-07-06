@@ -31,6 +31,7 @@ import MemberList from "./admin/MemberList";
 import ReviewReportList from "./admin/ReviewReportList";
 import TravelReportList from "./admin/TravelReportList";
 import BookMarkList from "./components/MyPage/BookMarkList";
+import Main from "./pages/Main";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Header />
         <main className="max-w-[1440px] mx-auto px-6 py-8 pb-[145px]">
           <Routes>
+            <Route path="/" element={<Main />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route
               path="/email-collection-policy"
