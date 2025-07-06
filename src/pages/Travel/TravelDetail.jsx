@@ -17,6 +17,7 @@ import axios from "axios";
 import GoogleMap from "./common/GoogleMap";
 import BookMark from "./common/BookMark";
 import { AuthContext } from "../../components/Context/AuthContext";
+import ReviewSection from "../Review/ReviewSection";
 
 function TravelDetailPage() {
   const { id } = useParams();
@@ -26,6 +27,14 @@ function TravelDetailPage() {
   const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
   const [operatingHoursList, setOperatingHoursList] = useState([]);
   const navigate = useNavigate();
+
+  // 리뷰 통계 상태 추가
+  const [reviewStats, setReviewStats] = useState({ count: 0, rating: 0 });
+
+  // 리뷰 통계 업데이트 핸들러
+  const handleReviewStatsUpdate = (stats) => {
+    setReviewStats(stats);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -155,11 +164,13 @@ function TravelDetailPage() {
                   <div className="flex items-center gap-1">
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
                     <span className="text-lg font-semibold">
-                      {travelDetail.rating}
+                      {reviewStats.rating > 0
+                        ? reviewStats.rating.toFixed(1)
+                        : "0.0"}
                     </span>
                   </div>
                   <span className="text-gray-600">
-                    리뷰 {travelDetail.reviews.toLocaleString()}개
+                    리뷰 {reviewStats.count.toLocaleString()}개
                   </span>
                 </div>
 
@@ -393,6 +404,9 @@ function TravelDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* 리뷰 섹션 */}
+        <ReviewSection travelNo={id} onStatsUpdate={handleReviewStatsUpdate} />
 
         {/* 목록으로 버튼 */}
         <div className="text-center">
