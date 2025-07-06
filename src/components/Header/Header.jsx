@@ -1,111 +1,89 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import WeGoJapanLogo from "../../assets/icons/WeGoJapan_Logo.png";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
+import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const navi = useNavigate();
   const { auth, logout } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // 로그인 페이지로 이동하는 함수
-  const handleLogin = () => {
-    navi("/login");
+  const goTo = (path) => {
+    navi(path);
+    setMenuOpen(false);
   };
 
-  // 로그아웃 처리 함수
   const handleLogout = () => {
     logout();
-  };
-
-  // 홈 페이지로 이동하는 함수
-  const goToHome = () => {
-    navi("/");
-  };
-
-  // 축제 페이지로 이동하는 함수
-  const goToFestivals = () => {
-    navi("/thema/travels");
-  };
-
-  // 여행지 페이지로 이동하는 함수
-  const goToTravels = () => {
-    navi("/travels");
-  };
-
-  // 나의 플랜 페이지로 이동하는 함수
-  const goToMyPlan = () => {
-    navi("/myplan");
-  };
-
-  // 내정보 페이지로 이동하는 함수
-  const goToMyInfo = () => {
-    navi("/myPage");
-  };
-
-  // 회원가입 페이지로 이동하는 함수
-  const goToSignup = () => {
-    navi("/signup");
+    setMenuOpen(false);
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white z-50">
       {/* 상단 헤더 영역 */}
-      <div className="flex justify-between items-center px-8 py-3">
-        {/* 로고 영역 */}
-        <div className="flex items-center">
-          <img
-            src={WeGoJapanLogo}
-            className="h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity duration-200"
-            onClick={goToHome}
-          />
+      <div className="flex justify-between items-center px-6 py-3 shadow-md relative">
+        {/* 로고 */}
+        <img
+          src={WeGoJapanLogo}
+          className="h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity duration-200"
+          onClick={() => goTo("/")}
+        />
+
+        {/* 햄버거 버튼 (모바일용) */}
+        <div className="md:hidden">
+          {menuOpen ? (
+            <X
+              className="w-7 h-7 cursor-pointer"
+              onClick={() => setMenuOpen(false)}
+            />
+          ) : (
+            <Menu
+              className="w-7 h-7 cursor-pointer"
+              onClick={() => setMenuOpen(true)}
+            />
+          )}
         </div>
 
-        {/* 로그인 상태에 따라 다르게 표시되는 버튼들 */}
-        <div className="flex items-center space-x-6">
-          {auth.isAuthenticated ? ( // 로그인된 상태라면
+        {/* 로그인/회원가입/로그아웃 등 (PC용) */}
+        <div className="hidden md:flex items-center space-x-4">
+          {auth.isAuthenticated ? (
             <>
-              {/* 관리자 여부 판단 */}
               {auth.loginInfo?.authorities?.some(
-                (auth) => auth.authority === "ROLE_ADMIN"
+                (a) => a.authority === "ROLE_ADMIN"
               ) ? (
                 <button
-                  onClick={() => navi("/adminPage")}
-                  className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
+                  onClick={() => goTo("/adminPage")}
+                  className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
                 >
                   관리자 페이지
                 </button>
               ) : (
                 <button
-                  onClick={goToMyInfo}
-                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
+                  onClick={() => goTo("/myPage")}
+                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
                 >
                   나의 정보
                 </button>
               )}
-
-              {/* 로그아웃 버튼 */}
               <button
                 onClick={handleLogout}
-                className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 로그아웃
               </button>
             </>
           ) : (
-            // 로그인되지 않은 상태라면
             <>
-              {/* 로그인 버튼 */}
               <button
-                onClick={handleLogin}
-                className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
+                onClick={() => goTo("/login")}
+                className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 로그인
               </button>
-
-              {/* 회원가입 버튼 */}
               <button
-                onClick={goToSignup}
-                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-sky-500 hover:to-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transform transition-all duration-200 text-sm cursor-pointer"
+                onClick={() => goTo("/signup")}
+                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-sky-500 hover:to-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 회원가입
               </button>
@@ -114,55 +92,91 @@ const Header = () => {
         </div>
       </div>
 
-      {/* 네비게이션 메뉴 영역 */}
+      {/* 메뉴 전체: 네비게이션 + (모바일용) 로그인/로그아웃 등 */}
       <div
-        className="w-full"
+        className={`w-full md:flex ${
+          menuOpen ? "block" : "hidden"
+        } transition-all duration-300`}
         style={{
           background:
             "linear-gradient(90deg, #87CEEB 0%, #4682B4 25%, #5F9EA0 50%, #20B2AA 75%, #48D1CC 100%)",
         }}
       >
-        <div className="flex">
-          {/* HOME 메뉴 */}
-          <div className="flex-1 text-center py-3 px-4">
-            <button
-              onClick={goToHome}
-              className="text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
-            >
-              HOME
-            </button>
-          </div>
-
-          {/* 축제 메뉴 */}
-          <div className="flex-1 text-center py-3 px-4">
-            <button
-              onClick={goToFestivals}
-              className="text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
-            >
-              테마
-            </button>
-          </div>
-
-          {/* 여행지 메뉴 */}
-          <div className="flex-1 text-center py-3 px-4">
-            <button
-              onClick={goToTravels}
-              className="text-white font-medium hover:bg-cyan-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
-            >
-              여행지
-            </button>
-          </div>
-
-          {/* 나의 플랜 세우기 메뉴 */}
-          <div className="flex-1 text-center py-3 px-4">
-            <button
-              onClick={goToMyPlan}
-              className="text-white font-medium hover:bg-sky-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-2 rounded-lg active:scale-95 active:translate-y-0 active:shadow-md transform transition-all duration-200 block w-full"
-            >
-              나의 플랜 세우기
-            </button>
-          </div>
+        {/* 네비게이션 메뉴 (공통) */}
+        <div className="flex flex-col md:flex-row w-full">
+          <button
+            onClick={() => goTo("/")}
+            className="text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+          >
+            HOME
+          </button>
+          <button
+            onClick={() => goTo("/thema/travels")}
+            className="text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+          >
+            테마
+          </button>
+          <button
+            onClick={() => goTo("/travels")}
+            className="text-white font-medium hover:bg-cyan-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+          >
+            여행지
+          </button>
+          <button
+            onClick={() => goTo("/myplan")}
+            className="text-white font-medium hover:bg-sky-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+          >
+            나의 플랜 세우기
+          </button>
         </div>
+
+        {/* 로그인/회원가입/로그아웃 (모바일용) */}
+        {menuOpen && (
+          <div className="flex flex-col md:hidden bg-white px-4 py-4 space-y-2 border-t">
+            {auth.isAuthenticated ? (
+              <>
+                {auth.loginInfo?.authorities?.some(
+                  (a) => a.authority === "ROLE_ADMIN"
+                ) ? (
+                  <button
+                    onClick={() => goTo("/adminPage")}
+                    className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow px-4 py-2 rounded"
+                  >
+                    관리자 페이지
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => goTo("/myPage")}
+                    className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow px-4 py-2 rounded"
+                  >
+                    나의 정보
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow px-4 py-2 rounded"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => goTo("/login")}
+                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow px-4 py-2 rounded"
+                >
+                  로그인
+                </button>
+                <button
+                  onClick={() => goTo("/signup")}
+                  className="text-gray-700 hover:text-white hover:bg-gradient-to-r from-sky-500 to-blue-500 hover:shadow px-4 py-2 rounded"
+                >
+                  회원가입
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
