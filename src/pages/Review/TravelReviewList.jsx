@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import { Star, UserCircle, Flag } from "lucide-react";
+import { Star, UserCircle, Flag, ChevronDown, Filter } from "lucide-react";
 import { AuthContext } from "../../components/Context/AuthContext";
 import ReviewReportModal from "../../components/report/ReviewReportModal";
 import ReviewLike from "../../components/reviews/ReviewLike";
@@ -25,6 +25,14 @@ const StarRating = ({ rating }) => (
   </div>
 );
 
+// 필터 옵션 정의
+const FILTER_OPTIONS = [
+  { value: "latest", label: "최신순" },
+  { value: "rating_high", label: "별점 높은순" },
+  { value: "rating_low", label: "별점 낮은순" },
+  { value: "like_high", label: "좋아요 높은순" },
+];
+
 function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
   const { auth } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]); // 현재 불러온 리뷰 목록
@@ -32,6 +40,10 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
   const [totalCount, setTotalCount] = useState(0); // 전체 리뷰 개수
   const [isLoading, setIsLoading] = useState(false); // 데이터 로딩 상태
   const [error, setError] = useState(null); // 에러 발생 상태
+
+  // 필터 관련 상태
+  const [selectedFilter, setSelectedFilter] = useState("latest");
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
   // 신고 모달 관련 상태
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -42,7 +54,7 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
   const apiUrl = window.ENV?.API_URL;
 
   // 리뷰 목록을 서버에서 가져오는 함수
-  const fetchReviews = (currentOffset) => {
+  const fetchReviews = (currentOffset, sortBy = selectedFilter) => {
     if (!travelNo) {
       console.warn("travelNo가 없습니다.");
       return;
@@ -52,13 +64,13 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
     setError(null); // 이전 에러 상태 초기화
 
     console.log(
-      `리뷰 요청: ${apiUrl}/api/reviews/travel/${travelNo}?offset=${currentOffset}&limit=${limit}`
+      `리뷰 요청: ${apiUrl}/api/reviews/travel/${travelNo}?offset=${currentOffset}&limit=${limit}&sort=${sortBy}`
     );
 
     // axios GET 요청으로 리뷰 목록 조회
     axios
       .get(
-        `${apiUrl}/api/reviews/travel/${travelNo}?offset=${currentOffset}&limit=${limit}`,
+        `${apiUrl}/api/reviews/travel/${travelNo}?offset=${currentOffset}&limit=${limit}&sort=${sortBy}`,
         {
           timeout: 10000, // 10초 타임아웃 설정
         }
@@ -151,11 +163,19 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
 
       fetchReviews(0);
     }
-  }, [travelNo]);
+  }, [travelNo, selectedFilter]);
 
   // 더보기 버튼 클릭시 추가 리뷰 로드
   const handleLoadMore = () => {
     fetchReviews(offset);
+  };
+
+  // 필터 변경 핸들러
+  const handleFilterChange = (filterValue) => {
+    setSelectedFilter(filterValue);
+    setIsFilterDropdownOpen(false);
+    setReviews([]);
+    setOffset(0);
   };
 
   // 리뷰 신고하기 버튼 클릭 핸들러
@@ -191,6 +211,43 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
 
   return (
     <div className="space-y-6">
+      {/* 리뷰 필터 드롭다운 */}
+      <div className="flex justify-end">
+        <div className="relative">
+          <button
+            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Filter className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-700">
+              {
+                FILTER_OPTIONS.find((option) => option.value === selectedFilter)
+                  ?.label
+              }
+            </span>
+            <ChevronDown className="h-4 w-4 text-gray-500" />
+          </button>
+
+          {isFilterDropdownOpen && (
+            <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+              {FILTER_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleFilterChange(option.value)}
+                  className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors ${
+                    selectedFilter === option.value
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* 리뷰 목록을 카드 형태로 렌더링 */}
       {reviews.map((review) => (
         <div key={review.reviewNo} className="border-t border-gray-200 pt-6">
