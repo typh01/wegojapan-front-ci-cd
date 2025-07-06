@@ -15,7 +15,7 @@ function DestinationGrid({ destinations }) {
         const imageUrl = dest.imageList?.[0]?.imageUrl || "/placeholder.svg";
         const category = dest.categoryName || "기타";
         const location = dest.address || dest.guName || "미정";
-        const rating = dest.rating || "리뷰 없음";
+        const rating = dest.rating || "0.0";
         const tags =
           dest.tagListForView?.map((t) => t.tagName || t.themaName) || [];
         const facilities =
