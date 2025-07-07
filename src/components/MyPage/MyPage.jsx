@@ -30,7 +30,7 @@ const MyPage = () => {
     {
       src: "/나의여행계획조회.png",
       text: "나의 여행 계획 조회",
-      path: "/mypage/travel",
+      path: "/myplan/list",
     },
     {
       src: "/나의리뷰조회.png",
