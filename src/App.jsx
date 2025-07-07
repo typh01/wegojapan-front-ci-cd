@@ -27,10 +27,16 @@ import ChangePassword from "./components/MyPage/ChangePassword";
 import DeleteMember from "./components/MyPage/DeleteMember";
 import AdminPage from "./admin/AdminPage";
 import MemberList from "./admin/MemberList";
-
 import ReviewReportList from "./admin/ReviewReportList";
 import TravelReportList from "./admin/TravelReportList";
 import BookMarkList from "./components/MyPage/BookMarkList";
+
+import Main from "./pages/Main";
+
+import ReviewForm from "./pages/Review/ReviewForm";
+import TravelReviewList from "./pages/Review/TravelReviewList";
+import MyReviewList from "./pages/Review/MyReviewList";
+
 
 function App() {
   return (
@@ -39,6 +45,7 @@ function App() {
         <Header />
         <main className="max-w-[1440px] mx-auto px-6 py-8 pb-[145px]">
           <Routes>
+            <Route path="/" element={<Main />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route
               path="/email-collection-policy"
@@ -93,6 +100,11 @@ function App() {
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
             <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
+
+            {/* 여행리뷰 */}
+            <Route path="/reviews/write" element={<ReviewForm />} />
+            <Route path="/reviews/list" element={<TravelReviewList />} />
+            <Route path="/myreviews/list" element={<MyReviewList />} />
           </Routes>
         </main>
         <Footer />

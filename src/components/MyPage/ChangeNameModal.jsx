@@ -4,7 +4,7 @@ import { AuthContext } from "../Context/AuthContext";
 import axios from "axios";
 
 const ChangeNameModal = ({ onClose }) => {
-  const { auth } = useContext(AuthContext);
+  const { auth, setAuth } = useContext(AuthContext);
   const memberNo = auth?.loginInfo?.memberNo;
   const [memberName, setMemberName] = useState("");
   const [checkResult, setCheckResult] = useState(null);
@@ -63,8 +63,14 @@ const ChangeNameModal = ({ onClose }) => {
       )
       .then((response) => {
         if (response.status === 200) {
-          setMemberName(memberName);
           alert("닉네임이 변경되었습니다.");
+          setAuth({
+            ...auth,
+            loginInfo: {
+              ...auth.loginInfo,
+              memberName: memberName,
+            },
+          });
           onClose();
         }
       })
