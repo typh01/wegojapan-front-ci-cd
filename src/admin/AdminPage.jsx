@@ -100,6 +100,15 @@ const AdminPage = () => {
             </div>
           </div>
         ))}
+
+        <div className="fixed bottom-6 right-6">
+          <button
+            onClick={() => navigate("/admin/staff")}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm"
+          >
+            💬 상담관리
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -36,6 +36,8 @@ import Main from "./pages/Main";
 import ReviewForm from "./pages/Review/ReviewForm";
 import TravelReviewList from "./pages/Review/TravelReviewList";
 import MyReviewList from "./pages/Review/MyReviewList";
+import CustomerChat from "./pages/Chat/CustomerChat";
+import StaffDashboard from "./pages/Chat/StaffDashboard";
 
 function App() {
   return (
@@ -107,6 +109,10 @@ function App() {
             <Route path="/reviews/write" element={<ReviewForm />} />
             <Route path="/reviews/list" element={<TravelReviewList />} />
             <Route path="/myreviews/list" element={<MyReviewList />} />
+
+            {/* 소켓 */}
+            <Route path="/" element={<CustomerChat />} />
+            <Route path="/admin/staff" element={<StaffDashboard />} />
           </Routes>
         </main>
         <Footer />

@@ -11,6 +11,7 @@ const ReviewReportModal = ({ isOpen, onClose, author, postTitle }) => {
     "욕설/혐오 발언 포함한 내용입니다.",
     "개인정보 노출 게시물입니다.",
     "불쾌한 표현이 있습니다.",
+    "도배적인 리뷰입니다",
     "기타",
   ];
   4;
