@@ -31,6 +31,26 @@ const StaffDashboard = () => {
   const subscription = useRef(null);
   const messagesEndRef = useRef(null);
 
+  // 웹소켓 URL 환경별 설정
+  const getWebSocketUrl = () => {
+    const hostname = window.location.hostname;
+
+    // 로컬 개발 환경
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "/ws";
+    }
+
+    // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
+    if (hostname === "wegojapan.shop") {
+      return "wss://wegojapan.shop/ws";
+    }
+
+    // 기타 환경
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    return `${protocol}//${host}/ws`;
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -47,7 +67,10 @@ const StaffDashboard = () => {
     }
 
     try {
-      const socket = new SockJS("/ws");
+      const wsUrl = getWebSocketUrl();
+      console.log("WebSocket URL:", wsUrl);
+
+      const socket = new SockJS(wsUrl);
       stompClient.current = Stomp.over(socket);
       stompClient.current.debug = null;
 
