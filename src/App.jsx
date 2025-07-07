@@ -18,7 +18,7 @@ import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import MyTravelPlanDetail from "./pages/MyPlan/MyTravelPlanDetail";
 import MyTravelPlanList from "./pages/MyPlan/MyTravelPlanList";
-import FindId from "./components/Auth/FindId";
+import FindId from "./components/Auth/FindId"; 
 import FindIdResult from "./components/Auth/FindIdResult";
 import FindPassword from "./components/Auth/FindPassword";
 import NewPassword from "./components/Auth/NewPassword";
