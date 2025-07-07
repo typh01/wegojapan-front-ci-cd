@@ -55,4 +55,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ubuntu/final
-            docker-compose restart final-web-1
+            docker-compose restart web
