@@ -51,6 +51,7 @@ function TravelPage() {
         },
       })
       .then((res) => {
+        console.log(res);
         const { data, total } = res.data.data;
         setPopularList(data.slice(0, 5));
         setTravelList(data.slice(5));
