@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import StepButton from "./StepButton";
-import StepIndicator from "./StepIndicator";
+import StepIndicator from "./StepIndIcator";
 import PlannerStep1 from "../../../pages/MyPlan/PlannerStep1";
 import PlannerStep2 from "../../../pages/MyPlan/PlannerStep2";
 import PlannerStep3 from "../../../pages/MyPlan/PlannerStep3";
