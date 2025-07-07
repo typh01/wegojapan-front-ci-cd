@@ -116,7 +116,6 @@ function AppContent() {
       </main>
       <Footer />
 
-      {isAdminPage && <StaffDashboard />}
       {!isAdminPage && <CustomerChat />}
     </div>
   );
