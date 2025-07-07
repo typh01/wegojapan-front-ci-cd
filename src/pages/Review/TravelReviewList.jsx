@@ -114,7 +114,9 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
         setTotalCount(totalCountData);
         setOffset(currentOffset + limit);
 
-        const safeAverage = Number.isFinite(averageRating) ? averageRating : 0;
+        const safeAverage = Number.isFinite(averageRatingValue)
+          ? averageRatingValue
+          : 0;
         // 첫 로드시에만 상위 컴포넌트에 통계 정보 전달
         if (currentOffset === 0 && onStatsUpdate) {
           onStatsUpdate({
