@@ -185,12 +185,16 @@ function ReviewSection({ travelNo, onStatsUpdate }) {
         </div>
 
         {/* 평균 별점 표시 */}
-        {reviewStats.count > 0 && (
+        {typeof reviewStats.rating === "number" && (
           <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-1">
               <Star className="h-5 w-5 text-yellow-400 fill-current" />
               <span className="text-lg font-semibold">
+<<<<<<< HEAD
                 {reviewStats.rating?.toFixed(1)}
+=======
+                {reviewStats.rating > 0 ? reviewStats.rating.toFixed(1) : "0.0"}
+>>>>>>> 219ed67a336d2c199c189186b63e1ca3033ae9ad
               </span>
             </div>
             <span className="text-gray-600">
@@ -198,7 +202,6 @@ function ReviewSection({ travelNo, onStatsUpdate }) {
             </span>
           </div>
         )}
-
         {/* 리뷰 작성/수정 폼 */}
         {showReviewForm && (
           <div className="mb-6">

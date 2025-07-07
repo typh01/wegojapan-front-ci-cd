@@ -11,6 +11,7 @@ import {
   Info,
   CheckCircle,
   XCircle,
+  ExternalLink,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -165,7 +166,7 @@ function TravelDetailPage() {
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
                     <span className="text-lg font-semibold">
                       {reviewStats.rating > 0
-                        ? reviewStats.rating.toFixed(1)
+                        ? reviewStats.rating?.toFixed(1)
                         : "0.0"}
                     </span>
                   </div>
