@@ -80,25 +80,28 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
 
         // 응답 데이터에서 필요한 정보 추출
         const responseData = response.data;
-        let reviewsData, totalCountData, averageRating;
-
+        let reviewsData, totalCountData, averageRatingValue; // averageRating을 averageRatingValue로 이름 변경
         if (responseData.data) {
-          // RequestData 구조로 래핑된 경우
           const data = responseData.data;
           reviewsData = data.reviews || [];
           totalCountData = data.totalCount || 0;
-          averageRating = data.averageRating || 0;
+          // averageRating이 숫자인지 확인하고 아니면 0으로 설정
+          averageRatingValue =
+            typeof data.averageRating === "number" ? data.averageRating : 0;
         } else {
-          // 직접 데이터가 응답된 경우
           reviewsData = responseData.reviews || [];
           totalCountData = responseData.totalCount || 0;
-          averageRating = responseData.averageRating || 0;
+          // averageRating이 숫자인지 확인하고 아니면 0으로 설정
+          averageRatingValue =
+            typeof responseData.averageRating === "number"
+              ? responseData.averageRating
+              : 0;
         }
 
         console.log("추출된 데이터:", {
           reviewsData,
           totalCountData,
-          averageRating,
+          averageRating: averageRatingValue, // 변경된 이름 사용
         });
 
         // 리뷰 목록 업데이트
@@ -116,7 +119,7 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
         if (currentOffset === 0 && onStatsUpdate) {
           onStatsUpdate({
             count: totalCountData,
-            rating: safeAverage,
+            rating: averageRatingValue, // 변경된 이름 사용
           });
         }
       })
