@@ -22,7 +22,7 @@ const Header = () => {
   return (
     <div className="w-full bg-white z-50">
       {/* 상단 헤더 영역 */}
-      <div className="flex justify-between items-center px-6 py-3 shadow-md relative">
+      <div className="max-w-screen-xl mx-auto flex justify-between items-center px-6 py-3 relative">
         {/* 로고 */}
         <img
           src={WeGoJapanLogo}
@@ -103,7 +103,7 @@ const Header = () => {
         }}
       >
         {/* 네비게이션 메뉴 (공통) */}
-        <div className="flex flex-col md:flex-row w-full">
+        <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row w-full">
           <button
             onClick={() => goTo("/")}
             className="text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
@@ -132,49 +132,51 @@ const Header = () => {
 
         {/* 로그인/회원가입/로그아웃 (모바일용) */}
         {menuOpen && (
-          <div className="flex flex-col md:hidden bg-white px-4 py-4 space-y-2 border-t">
-            {auth.isAuthenticated ? (
-              <>
-                {auth.loginInfo?.authorities?.some(
-                  (a) => a.authority === "ROLE_ADMIN"
-                ) ? (
+          <div className="bg-white border-t">
+            <div className="flex flex-col md:hidden bg-white px-4 py-4 space-y-2 border-t">
+              {auth.isAuthenticated ? (
+                <>
+                  {auth.loginInfo?.authorities?.some(
+                    (a) => a.authority === "ROLE_ADMIN"
+                  ) ? (
+                    <button
+                      onClick={() => goTo("/adminPage")}
+                      className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow px-4 py-2 rounded"
+                    >
+                      관리자 페이지
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => goTo("/myPage")}
+                      className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow px-4 py-2 rounded"
+                    >
+                      나의 정보
+                    </button>
+                  )}
                   <button
-                    onClick={() => goTo("/adminPage")}
-                    className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow px-4 py-2 rounded"
+                    onClick={handleLogout}
+                    className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow px-4 py-2 rounded"
                   >
-                    관리자 페이지
+                    로그아웃
                   </button>
-                ) : (
+                </>
+              ) : (
+                <>
                   <button
-                    onClick={() => goTo("/myPage")}
+                    onClick={() => goTo("/login")}
                     className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow px-4 py-2 rounded"
                   >
-                    나의 정보
+                    로그인
                   </button>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow px-4 py-2 rounded"
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => goTo("/login")}
-                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow px-4 py-2 rounded"
-                >
-                  로그인
-                </button>
-                <button
-                  onClick={() => goTo("/signup")}
-                  className="text-gray-700 hover:text-white hover:bg-gradient-to-r from-sky-500 to-blue-500 hover:shadow px-4 py-2 rounded"
-                >
-                  회원가입
-                </button>
-              </>
-            )}
+                  <button
+                    onClick={() => goTo("/signup")}
+                    className="text-gray-700 hover:text-white hover:bg-gradient-to-r from-sky-500 to-blue-500 hover:shadow px-4 py-2 rounded"
+                  >
+                    회원가입
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

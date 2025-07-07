@@ -52,7 +52,7 @@ function TravelDetailPage() {
           phone: data.tel || "정보 없음",
           website: data.website || "#",
           operatingStatus: data.status === "Y" ? "운영중" : "운영종료",
-          rating: (data.rating || 0.0).toFixed(2),
+          rating: 4.5,
           reviews: 0,
           price: "-",
           description: data.description,
