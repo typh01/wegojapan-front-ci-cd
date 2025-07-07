@@ -37,7 +37,6 @@ import ReviewForm from "./pages/Review/ReviewForm";
 import TravelReviewList from "./pages/Review/TravelReviewList";
 import MyReviewList from "./pages/Review/MyReviewList";
 
-
 function App() {
   return (
     <AuthProvider>
@@ -99,7 +98,10 @@ function App() {
             {/* 나의 여행 플랜 */}
             <Route path="/myplan" element={<StepIndicator />} />
             <Route path="/myplan/list" element={<MyTravelPlanList />} />
-            <Route path="/myplan/detail" element={<MyTravelPlanDetail />} />
+            <Route
+              path="/myplan/detail/:planNo"
+              element={<MyTravelPlanDetail />}
+            />
 
             {/* 여행리뷰 */}
             <Route path="/reviews/write" element={<ReviewForm />} />

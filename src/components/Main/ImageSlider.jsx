@@ -42,9 +42,6 @@ const ImageSlider = () => {
             className="w-full h-full object-cover object-center"
             loading="lazy"
           />
-          <div className="absolute bottom-4 left-4 text-white text-base md:text-lg bg-black bg-opacity-50 px-3 py-1.5 rounded shadow-md">
-            {slide.caption}
-          </div>
         </div>
       ))}
     </div>

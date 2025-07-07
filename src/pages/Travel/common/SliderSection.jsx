@@ -51,7 +51,7 @@ function SliderSection({ items = [], title }) {
                         <div className="flex items-center gap-1">
                           <Star className="h-4 w-4 text-yellow-400 fill-current" />
                           <span className="text-sm text-gray-600">
-                            {item.rating || "0.0"}
+                            {item.rating.toFixed(1) || "0.0"}
                           </span>
                         </div>
                       </div>
@@ -103,7 +103,7 @@ function SliderSection({ items = [], title }) {
               key={idx}
               onClick={() => setCurrentSlide(idx)}
               className={`w-3 h-3 rounded-full transition-colors ${
-                idx === currentSlide ? "bg-blue-600" : "bg-gray-300"
+                idx === currentSlide ? "bg-cyan-500" : "bg-cyan-200"
               }`}
             />
           ))}
