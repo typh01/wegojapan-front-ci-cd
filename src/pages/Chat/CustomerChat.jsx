@@ -34,7 +34,7 @@ const CustomerChat = () => {
 
     // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
     if (hostname === "wegojapan.shop") {
-      return "wss://wegojapan.shop/ws";
+      return "https://wegojapan.shop/ws";
     }
 
     // 기타 환경
