@@ -40,7 +40,7 @@ const CustomerChat = () => {
     // 기타 환경
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
-    return `${protocol}//${host}/ws`;
+    return `${protocol}://${host}/ws`;
   };
 
   const scrollToBottom = () => {
