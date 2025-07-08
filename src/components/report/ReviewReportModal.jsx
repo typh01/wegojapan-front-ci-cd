@@ -1,9 +1,17 @@
-import { useState } from "react";
-
-const ReviewReportModal = ({ isOpen, onClose, author, postTitle }) => {
+import { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../Context/AuthContext";
+const ReviewReportModal = ({
+  isOpen,
+  onClose,
+  author,
+  postTitle,
+  reviewNo,
+}) => {
   const [selectedReason, setSelectedReason] = useState("");
   const [detail, setDetail] = useState("");
-
+  const { auth } = useContext(AuthContext);
+  const apiUrl = window.ENV?.API_URL || "http://localhost:8000";
   const reasons = [
     "스팸홍보/도배글입니다.",
     "불법정보를 포함하고 있습니다.",
@@ -11,10 +19,11 @@ const ReviewReportModal = ({ isOpen, onClose, author, postTitle }) => {
     "욕설/혐오 발언 포함한 내용입니다.",
     "개인정보 노출 게시물입니다.",
     "불쾌한 표현이 있습니다.",
-    "도배적인 리뷰입니다",
+    "도배적인 리뷰입니다.",
     "기타",
   ];
-  4;
+
+  const memberNo = auth?.loginInfo?.memberNo;
 
   const handleSubmit = () => {
     if (!selectedReason) {
@@ -22,8 +31,29 @@ const ReviewReportModal = ({ isOpen, onClose, author, postTitle }) => {
       return;
     }
 
-    alert("신고가 완료되었습니다.");
-    onClose();
+    axios
+      .post(
+        `${apiUrl}/api/reports/review`,
+        {
+          reviewNo,
+          memberNo,
+          reportContent: selectedReason,
+          detail: detail || null,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.tokens.accessToken}`,
+          },
+        }
+      )
+      .then(() => {
+        alert("신고가 완료되었습니다.");
+        onClose();
+      })
+      .catch((error) => {
+        console.error("신고 실패", error);
+        alert("신고 중 오류가 발생했습니다.");
+      });
   };
 
   if (!isOpen) return null;

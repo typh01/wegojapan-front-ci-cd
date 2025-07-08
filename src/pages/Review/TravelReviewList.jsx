@@ -389,6 +389,7 @@ function TravelReviewList({ travelNo, onStatsUpdate, onEdit, onDelete }) {
         onClose={handleReportModalClose}
         author={selectedReportReview?.memberName || "익명"}
         postTitle={selectedReportReview?.reviewTitle || ""}
+        reviewNo={selectedReportReview?.reviewNo}
       />
     </div>
   );
