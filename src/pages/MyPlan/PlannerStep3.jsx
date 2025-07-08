@@ -340,11 +340,9 @@ const PlannerStep3 = ({
   };
 
   return (
-    <div className="h-full flex gap-6">
-      {/* 왼쪽: 여행지 목록 */}
-      <div className="w-1/2 flex flex-col">
-        {/* 선택된 지역 표시 */}
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+    <div className="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="w-full lg:w-1/2 flex flex-col">
           <h3 className="text-sm font-medium text-blue-800">
             선택된 지역: {selectedRegion}
           </h3>

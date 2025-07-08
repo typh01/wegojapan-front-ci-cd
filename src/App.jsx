@@ -18,7 +18,7 @@ import TravelDetailPage from "./pages/Travel/TravelDetail";
 import TravelDetailSearchPage from "./pages/Travel/TravelDetailSearch";
 import MyTravelPlanDetail from "./pages/MyPlan/MyTravelPlanDetail";
 import MyTravelPlanList from "./pages/MyPlan/MyTravelPlanList";
-import FindId from "./components/Auth/FindId"; 
+import FindId from "./components/Auth/FindId";
 import FindIdResult from "./components/Auth/FindIdResult";
 import FindPassword from "./components/Auth/FindPassword";
 import NewPassword from "./components/Auth/NewPassword";
@@ -47,7 +47,21 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-[1440px] mx-auto px-6 py-8 pb-[145px]">
+      <main
+        className="
+  max-w-[1440px] 
+  mx-auto 
+  px-4   
+  sm:px-6
+  lg:px-6 
+  py-4 
+  sm:py-6
+  lg:py-8
+  pb-32
+  sm:pb-36
+  lg:pb-[145px]
+"
+      >
         <Routes>
           <Route path="/" element={<Main />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
