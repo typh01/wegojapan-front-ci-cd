@@ -44,13 +44,11 @@ const Main = () => {
     <div>
       {/* 이미지 슬라이더 */}
       <ImageSlider />
+
       {/* ✅ 사이트 소개 섹션 */}
       <section className="relative h-[480px] sm:h-[520px] bg-gradient-to-br from-blue-100 via-white to-teal-100">
-        {/* 배경 이미지 + 오버레이 */}
         <div className="absolute inset-0 bg-cover bg-center bg-[url('/images/japan-hero.jpg')] opacity-80" />
         <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
-
-        {/* 콘텐츠 */}
         <div className="relative z-10 max-w-6xl mx-auto h-full flex flex-col justify-center items-center text-center px-4">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-800 mb-4 drop-shadow-md">
             일본 여행, 지금 시작해보세요
@@ -81,6 +79,7 @@ const Main = () => {
         </section>
       </section>
 
+      {/* ✅ 일본 여행 준비물 체크리스트 */}
       <section className="px-4 mt-20 mb-16">
         <h2 className="text-2xl font-bold text-blue-900 mb-8 text-center">
           🧳️ 일본 여행 준비물 체크리스트
@@ -120,7 +119,7 @@ const Main = () => {
           ].map((item, idx) => (
             <div
               key={idx}
-              className={`min-w-[140px] h-[150px] flex flex-col items-center justify-center rounded-xl shadow-sm hover:shadow-md transition bg-gradient-to-br ${item.bg}`}
+              className={`min-w-[160px] h-[160px] flex flex-col items-center justify-center rounded-xl shadow-sm hover:shadow-md transition bg-gradient-to-br ${item.bg}`}
             >
               {item.icon}
               <p className="mt-3 text-base font-semibold text-gray-800 text-center">
@@ -181,7 +180,7 @@ const Main = () => {
             ].map((tip, i) => (
               <div
                 key={i}
-                className={`rounded-xl shadow-md hover:shadow-lg transition bg-gradient-to-br ${tip.bg} p-6 h-full flex flex-col justify-center`}
+                className={`rounded-xl shadow-md hover:shadow-lg transition bg-gradient-to-br ${tip.bg} p-6 h-[180px] flex flex-col justify-center`}
               >
                 <h3 className="text-lg font-bold text-blue-900 mb-2">
                   {tip.title}

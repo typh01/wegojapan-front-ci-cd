@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
-import ChangeNameModal from "./ChangeNameModal"; // 모달 컴포넌트 import
+import ChangeNameModal from "./ChangeNameModal";
 
 const MyPage = () => {
   const { auth } = useContext(AuthContext);
   const { loginInfo, isLoading, isAuthenticated } = auth;
   const navigate = useNavigate();
-  const [showChangeNameModal, setShowChangeNameModal] = useState(false); // 모달 상태
+  const [showChangeNameModal, setShowChangeNameModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
