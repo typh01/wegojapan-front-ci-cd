@@ -47,7 +47,6 @@ function ThemaTravelPage() {
         },
       })
       .then((res) => {
-        console.log(res);
         const { content, totalPages } = res.data.data;
         setTravelList(content);
         setTotalPages(totalPages);

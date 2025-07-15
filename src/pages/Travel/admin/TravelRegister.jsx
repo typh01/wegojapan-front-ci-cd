@@ -103,7 +103,6 @@ function TravelRegister() {
           createdDate: cat.categoryCreatedDate,
           modifiedDate: cat.categoryModifiedDate,
         }));
-        console.log("카테고리 목록 조회 성공:", res.data);
         setCategories(categoryList);
       })
       .catch((err) => {
@@ -125,7 +124,6 @@ function TravelRegister() {
           createdDate: gu.guCreatedDate,
           modifiedDate: gu.guModifiedDate,
         }));
-        console.log("구/군 목록 조회 성공:", res.data);
         setDistricts(guList);
       })
       .catch((err) => {
@@ -144,7 +142,6 @@ function TravelRegister() {
           createdDate: opt.optionCreatedDate,
           modifiedDate: opt.optionModifiedDate,
         }));
-        console.log("옵션 목록 조회 성공:", res.data);
         setTravelOptions(optionList);
       })
       .catch((err) => {
@@ -266,7 +263,6 @@ function TravelRegister() {
         },
       })
       .then((res) => {
-        console.log("S3 업로드 성공", res.data);
         return res.data.data;
       })
       .catch((err) => {

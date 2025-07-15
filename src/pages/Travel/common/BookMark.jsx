@@ -50,8 +50,7 @@ const BookMark = ({ travelNo }) => {
           },
         }
       )
-      .then((response) => {
-        console.log(response);
+      .then(() => {
         setBookmarked((prev) => !prev);
         alert(
           bookmarked

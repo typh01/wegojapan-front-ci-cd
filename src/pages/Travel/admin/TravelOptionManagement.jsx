@@ -146,7 +146,6 @@ export default function TravelOptionsManagement() {
           createdDate: city.cityCreatedDate,
           modifiedDate: city.cityModifiedDate,
         }));
-        console.log("시/도 목록 조회 성공:", res.data);
         setCities(cityList);
       })
       .catch((err) => {
@@ -177,7 +176,6 @@ export default function TravelOptionsManagement() {
           createdDate: newCity.cityCreatedDate || now,
           modifiedDate: newCity.cityModifiedDate || now,
         };
-        console.log("시/도 추가 성공:", res.data);
         setCities((prev) => [...prev, newItem]);
         closeModal();
       })
@@ -200,7 +198,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("수정 성공:", res.data);
         fetchCities(); // 목록 다시 불러오기
         closeModal();
       })
@@ -214,7 +211,6 @@ export default function TravelOptionsManagement() {
     axios
       .delete(`${API_URL}/api/admin/travels/city/${id}`, { headers })
       .then((res) => {
-        console.log("삭제 성공:", res.data);
         fetchCities(); // 목록 재조회
         setDeleteConfirm(null);
       })
@@ -240,7 +236,6 @@ export default function TravelOptionsManagement() {
           createdDate: gu.guCreatedDate,
           modifiedDate: gu.guModifiedDate,
         }));
-        console.log("구/군 목록 조회 성공:", res.data);
         setDistricts(guList);
       })
       .catch((err) => {
@@ -274,7 +269,6 @@ export default function TravelOptionsManagement() {
           createdDate: newGu.guCreatedDate || now,
           modifiedDate: newGu.guModifiedDate || now,
         };
-        console.log("구/군 추가 성공:", res.data);
         setDistricts((prev) => [...prev, newItem]);
         closeModal();
       })
@@ -298,7 +292,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("수정 성공:", res.data);
         fetchDistricts(); // 목록 다시 불러오기
         closeModal();
       })
@@ -312,7 +305,6 @@ export default function TravelOptionsManagement() {
     axios
       .delete(`${API_URL}/api/admin/travels/gu/${id}`, { headers })
       .then((res) => {
-        console.log("삭제 성공:", res.data);
         fetchDistricts(); // 목록 재조회
         setDeleteConfirm(null);
       })
@@ -333,7 +325,6 @@ export default function TravelOptionsManagement() {
           createdDate: cat.categoryCreatedDate,
           modifiedDate: cat.categoryModifiedDate,
         }));
-        console.log("카테고리 목록 조회 성공:", res.data);
         setCategories(categoryList);
       })
       .catch((err) => {
@@ -349,7 +340,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("카테고리 등록 성공:", res.data);
         fetchCategories();
         closeModal();
       })
@@ -370,7 +360,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("카테고리 수정 성공:", res.data);
         fetchCategories();
         closeModal();
       })
@@ -387,7 +376,6 @@ export default function TravelOptionsManagement() {
         data: [id], // 삭제할 카테고리 ID 배열
       })
       .then((res) => {
-        console.log("카테고리 삭제 성공:", res.data);
         fetchCategories();
         setDeleteConfirm(null);
       })
@@ -407,7 +395,6 @@ export default function TravelOptionsManagement() {
           createdDate: tag.tagCreatedDate,
           modifiedDate: tag.tagModifiedDate,
         }));
-        console.log("태그 목록 조회 성공:", res.data);
         setTravelTags(tagList);
       })
       .catch((err) => {
@@ -422,7 +409,6 @@ export default function TravelOptionsManagement() {
     axios
       .post(`${API_URL}/api/admin/travels/tag`, { tagName }, { headers })
       .then((res) => {
-        console.log("태그 등록 성공:", res.data);
         fetchTags();
         closeModal();
       })
@@ -443,7 +429,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("태그 수정 성공:", res.data);
         fetchTags();
         closeModal();
       })
@@ -460,7 +445,6 @@ export default function TravelOptionsManagement() {
         data: [id],
       })
       .then((res) => {
-        console.log("태그 삭제 성공:", res.data);
         fetchTags();
         setDeleteConfirm(null);
       })
@@ -481,7 +465,6 @@ export default function TravelOptionsManagement() {
           createdDate: thema.themaCreatedDate,
           modifiedDate: thema.themaModifiedDate,
         }));
-        console.log("테마 목록 조회 성공:", res.data);
         setTravelThemas(themaList);
       })
       .catch((err) => {
@@ -497,7 +480,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("테마 등록 성공:", res.data);
         fetchThemas();
         closeModal();
       })
@@ -518,7 +500,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("테마 수정 성공:", res.data);
         fetchThemas();
         closeModal();
       })
@@ -535,7 +516,6 @@ export default function TravelOptionsManagement() {
         data: [id],
       })
       .then((res) => {
-        console.log("테마 삭제 성공:", res.data);
         fetchThemas();
         setDeleteConfirm(null);
       })
@@ -556,7 +536,6 @@ export default function TravelOptionsManagement() {
           createdDate: opt.optionCreatedDate,
           modifiedDate: opt.optionModifiedDate,
         }));
-        console.log("옵션 목록 조회 성공:", res.data);
         setTravelOptions(optionList);
       })
       .catch((err) => {
@@ -572,7 +551,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("옵션 등록 성공:", res.data);
         fetchOptions();
         closeModal();
       })
@@ -593,7 +571,6 @@ export default function TravelOptionsManagement() {
         { headers }
       )
       .then((res) => {
-        console.log("옵션 수정 성공:", res.data);
         fetchOptions();
         closeModal();
       })
@@ -610,7 +587,6 @@ export default function TravelOptionsManagement() {
         data: [id],
       })
       .then((res) => {
-        console.log("옵션 삭제 성공:", res.data);
         fetchOptions();
         setDeleteConfirm(null);
       })

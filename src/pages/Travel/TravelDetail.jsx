@@ -43,7 +43,6 @@ function TravelDetailPage() {
       .get(`${apiUrl}/api/travels/${id}`)
       .then((res) => {
         const data = res.data.data;
-        console.log(data);
 
         setTravelDetail({
           title: data.title,

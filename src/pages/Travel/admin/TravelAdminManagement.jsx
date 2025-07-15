@@ -163,7 +163,6 @@ export default function TravelAdminManagement() {
         headers,
       })
       .then((res) => {
-        console.log(res);
         const { data, total } = res.data.data;
 
         const validData = data.filter(
