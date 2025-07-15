@@ -1,4 +1,4 @@
-name: Build And final React App
+name: Build And Deploy React App
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-final:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,10 +33,10 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            rm -rf /home/ubuntu/final/front/dist
-            mkdir -p /home/ubuntu/final/front/dist
+            rm -rf /home/ubuntu/deploy/front/dist
+            mkdir -p /home/ubuntu/deploy/front/dist
 
-      - name: final React Project To EC2
+      - name: Deploy React Project To EC2
         if: github.event_name == 'push'
         uses: appleboy/scp-action@master
         with:
@@ -44,7 +44,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: "dist/"
-          target: "/home/ubuntu/final/front"
+          target: "/home/ubuntu/deploy/front"
 
       - name: Restart Container
         if: github.event_name == 'push'
@@ -54,5 +54,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/ubuntu/final
-            docker-compose restart web
+            cd /home/ubuntu/deploy
+            docker-compose restart deploy-web-1
