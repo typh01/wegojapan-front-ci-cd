@@ -54,21 +54,21 @@ const Header = () => {
               ) ? (
                 <button
                   onClick={() => goTo("/adminPage")}
-                  className="text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
+                  className="cursor-pointer text-blue-600 font-semibold hover:text-white hover:bg-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
                 >
                   관리자 페이지
                 </button>
               ) : (
                 <button
                   onClick={() => goTo("/myPage")}
-                  className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
+                  className="cursor-pointer text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
                 >
                   나의 정보
                 </button>
               )}
               <button
                 onClick={handleLogout}
-                className="text-gray-700 hover:text-white hover:bg-red-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
+                className="cursor-pointer text-gray-700 hover:text-white hover:bg-red-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 로그아웃
               </button>
@@ -77,13 +77,13 @@ const Header = () => {
             <>
               <button
                 onClick={() => goTo("/login")}
-                className="text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
+                className="cursor-pointer text-gray-700 hover:text-white hover:bg-sky-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 로그인
               </button>
               <button
                 onClick={() => goTo("/signup")}
-                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-sky-500 hover:to-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
+                className="cursor-pointer text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-sky-500 hover:to-blue-500 hover:shadow-lg px-4 py-2 rounded-full active:scale-95 active:shadow-md transition-all duration-200 text-sm"
               >
                 회원가입
               </button>
@@ -106,25 +106,25 @@ const Header = () => {
         <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row w-full">
           <button
             onClick={() => goTo("/")}
-            className="text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+            className="cursor-pointer text-white font-medium hover:bg-blue-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
           >
             HOME
           </button>
           <button
             onClick={() => goTo("/thema/travels")}
-            className="text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+            className="cursor-pointer text-white font-medium hover:bg-teal-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
           >
             테마
           </button>
           <button
             onClick={() => goTo("/travels")}
-            className="text-white font-medium hover:bg-cyan-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+            className="cursor-pointer text-white font-medium hover:bg-cyan-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
           >
             여행지
           </button>
           <button
             onClick={() => goTo("/myplan")}
-            className="text-white font-medium hover:bg-sky-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
+            className="cursor-pointer text-white font-medium hover:bg-sky-600 hover:bg-opacity-40 hover:shadow-lg hover:-translate-y-0.5 px-4 py-3 text-center w-full active:scale-95 active:shadow-md transition-all duration-200"
           >
             나의 플랜 세우기
           </button>
