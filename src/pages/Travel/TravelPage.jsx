@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import SliderSection from "./common/SliderSection";
 import CategoryFilter from "./common/CategoryFilter";
 import DestinationGrid from "./common/DestinationGrid";
-import Pagination from "../../components/common/Page/Pagination";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
