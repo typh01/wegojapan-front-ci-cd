@@ -74,7 +74,9 @@ const StaffDashboard = () => {
 
       const socket = new SockJS(wsUrl);
       stompClient.current = Stomp.over(socket);
-      stompClient.current.debug = null;
+      stompClient.current.debug = function (str) {
+        console.log("[STOMP DEBUG]", str);
+      };
 
       stompClient.current.connect(
         {},
