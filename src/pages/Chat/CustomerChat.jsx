@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, Send, X, Phone, User } from "lucide-react";
 import axios from "axios";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
 
 const CustomerChat = () => {
   const [customerInfo, setCustomerInfo] = useState(() => {
