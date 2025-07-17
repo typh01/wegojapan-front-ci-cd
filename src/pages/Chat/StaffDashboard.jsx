@@ -43,13 +43,14 @@ const StaffDashboard = () => {
     }
 
     // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
-    if (hostname === "wegojapan.shop") {
-      return "https://wegojapan.shop/ws";
+    if (hostname === "wegojapan.store") {
+      return "https://wegojapan.store/ws";
     }
 
     // 기타 환경
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const host = window.location.host;
+    return `${protocol}://${host}/ws`;
   };
 
   const scrollToBottom = () => {
