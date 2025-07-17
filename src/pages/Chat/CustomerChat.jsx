@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, Send, X, Phone, User } from "lucide-react";
 import axios from "axios";
-import SockJS from "sockjs-client";
-import { CompatClient, Stomp } from "@stomp/stompjs";
 
 const CustomerChat = () => {
   const [customerInfo, setCustomerInfo] = useState(() => {
@@ -35,8 +33,8 @@ const CustomerChat = () => {
     }
 
     // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
-    if (hostname === "wegojapan.store") {
-      return "https://wegojapan.store/ws";
+    if (hostname === "wegojapan.shop") {
+      return "https://wegojapan.shop/ws";
     }
 
     // 기타 환경

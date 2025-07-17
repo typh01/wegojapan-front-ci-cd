@@ -11,8 +11,6 @@ import {
   ArrowRightCircle,
 } from "lucide-react";
 import axios from "axios";
-import SockJS from "sockjs-client";
-import { CompatClient, Stomp } from "@stomp/stompjs";
 
 const StaffDashboard = () => {
   const [staffInfo, setStaffInfo] = useState({
@@ -43,8 +41,8 @@ const StaffDashboard = () => {
     }
 
     // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
-    if (hostname === "wegojapan.store") {
-      return "https://wegojapan.store/ws";
+    if (hostname === "wegojapan.shop") {
+      return "https://wegojapan.shop/ws";
     }
 
     // 기타 환경
