@@ -44,7 +44,7 @@ const StaffDashboard = () => {
 
     // 프로덕션 환경 - wegojapan.shop (HTTPS이므로 WSS 사용)
     if (hostname === "wegojapan.store") {
-      return "wss://wegojapan.store/ws";
+      return "https://wegojapan.store/ws";
     }
 
     // 기타 환경
